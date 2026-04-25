@@ -33,7 +33,7 @@ export function StatsBar({ skills }: StatsBarProps) {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
       <StatCard icon={<Zap className="size-4" />} label="Level" value={String(level)} sub={milestone.label} />
-      <StatCard icon={<Award className="size-4" />} label="Total Hours" value={totalDisplay} sub={next ? `${next.hours}h to next` : "maxed!"} />
+      <StatCard icon={<Award className="size-4" />} label="Total Time" value={totalDisplay} sub={next ? `${next.hours}h to next` : "maxed!"} />
       <StatCard icon={<Target className="size-4" />} label="Skills" value={String(skills.length)} sub={`active`} />
     </div>
   );
