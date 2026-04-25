@@ -1,16 +1,18 @@
-# lockin
+# 10k hours
 
-Task timer with two modes: countdown to deadline, or lock-in to track time spent.
+Track hours spent on skills toward mastery. Based on the 10,000-hour rule.
 
-**[lockin-dob.pages.dev](https://lockin-dob.pages.dev)**
+Practice any skill — coding, music, art, sports, languages — and watch your hours add up. Hit milestones at 1, 10, 100, 1000, and 10000 hours. Level up as you go.
 
-## what it does
+## features
 
-- **Countdown** — shows time remaining until your next deadline
-- **Lock-in** — count-up timer that tracks how long you've been working on a task; persists across sessions
-- Subtasks, reordering, overdue alerts
-- Dark mode
-- Everything in local storage, no account needed
+- **Skill timer** — count-up timer that tracks total hours per skill
+- **Milestones** — earn badges at 1h, 10h, 100h, 500h, 1000h, 5000h, 10000h
+- **Gamification** — XP, levels, streaks, skill categories
+- **Dashboard** — total hours, skills mastered, current streak
+- **Dark mode** — toggle at the top
+- **Cloud sync** — sign in with Google or GitHub to sync across devices
+- **Local-first** — works offline, syncs when signed in
 
 ## dev
 
@@ -25,8 +27,8 @@ bun run dev
 bun run deploy
 ```
 
-Cloudflare Pages via Wrangler. Auto-deploys on commit.
+Cloudflare Pages + D1 via Wrangler.
 
 ## stack
 
-React · Vite · Tailwind · Radix · Bun
+React · Vite · Tailwind · Radix · Bun · Cloudflare D1 · Better Auth

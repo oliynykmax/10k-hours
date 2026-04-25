@@ -1,5 +1,5 @@
 import { createAuth } from "../_lib/auth";
-import { createDB, taskRowToClient } from "../_lib/db";
+import { createDB, skillRowToClient } from "../_lib/db";
 
 export const onRequestGet: PagesFunction = async (context) => {
   const auth = createAuth(context.env as any);
@@ -10,7 +10,7 @@ export const onRequestGet: PagesFunction = async (context) => {
 
   const db = createDB(context.env.DB as D1Database);
   const rows = await db
-    .selectFrom("task")
+    .selectFrom("skill")
     .selectAll()
     .where("user_id", "=", session.user.id)
     .orderBy("sort_order", "asc")
@@ -18,7 +18,7 @@ export const onRequestGet: PagesFunction = async (context) => {
     .execute();
 
   return new Response(
-    JSON.stringify(rows.map(taskRowToClient)),
+    JSON.stringify(rows.map(skillRowToClient)),
     { headers: { "Content-Type": "application/json" } },
   );
 };
@@ -32,6 +32,7 @@ export const onRequestPost: PagesFunction = async (context) => {
 
   const body = await context.request.json() as {
     title: string;
+    category?: string;
     deadline?: string | null;
     id?: string;
   };
@@ -40,9 +41,8 @@ export const onRequestPost: PagesFunction = async (context) => {
   const now = Date.now();
   const id = body.id ?? now.toString(36) + Math.random().toString(36).slice(2, 7);
 
-  // Get next sort order
   const maxOrder = await db
-    .selectFrom("task")
+    .selectFrom("skill")
     .select(db.fn.max("sort_order").as("max_order"))
     .where("user_id", "=", session.user.id)
     .execute();
@@ -52,6 +52,7 @@ export const onRequestPost: PagesFunction = async (context) => {
     id,
     user_id: session.user.id,
     title: body.title.trim(),
+    category: body.category ?? "other",
     deadline: body.deadline ?? null,
     completed: 0,
     subtasks: "[]",
@@ -62,15 +63,14 @@ export const onRequestPost: PagesFunction = async (context) => {
     updated_at: now,
   };
 
-  await db.insertInto("task").values(row).execute();
+  await db.insertInto("skill").values(row).execute();
 
   return new Response(
-    JSON.stringify(taskRowToClient(row as any)),
+    JSON.stringify(skillRowToClient(row as any)),
     { headers: { "Content-Type": "application/json" }, status: 201 },
   );
 };
 
-// Bulk sync: reconcile local changes with server
 export const onRequestPut: PagesFunction = async (context) => {
   const auth = createAuth(context.env as any);
   const session = await auth.api.getSession({ headers: context.request.headers });
@@ -82,6 +82,7 @@ export const onRequestPut: PagesFunction = async (context) => {
     tasks: Array<{
       id: string;
       title: string;
+      category?: string;
       deadline: string | null;
       completed: boolean;
       subtasks: Array<{ text: string; done: boolean }>;
@@ -94,9 +95,8 @@ export const onRequestPut: PagesFunction = async (context) => {
 
   const db = createDB(context.env.DB as D1Database);
 
-  // Get existing server tasks
   const existing = await db
-    .selectFrom("task")
+    .selectFrom("skill")
     .select(["id", "updated_at"])
     .where("user_id", "=", session.user.id)
     .execute();
@@ -113,6 +113,7 @@ export const onRequestPut: PagesFunction = async (context) => {
       id: task.id,
       user_id: session.user.id,
       title: task.title,
+      category: task.category ?? "other",
       deadline: task.deadline,
       completed: task.completed ? 1 : 0,
       subtasks: JSON.stringify(task.subtasks),
@@ -124,28 +125,24 @@ export const onRequestPut: PagesFunction = async (context) => {
     };
 
     if (serverUpdatedAt === undefined) {
-      // New task — insert
       toInsert.push(row);
     } else if (task.updatedAt > serverUpdatedAt) {
-      // Client has newer version — update
       toUpdate.push(row);
     }
-    // else: server is newer, skip (server wins)
   }
 
-  // Find tasks on server that client doesn't have (deleted locally)
   const clientIds = new Set(body.tasks.map((t) => t.id));
   const toDelete = existing.filter((r) => !clientIds.has(r.id));
 
-  // Execute in sequence to avoid D1 concurrency issues
   for (const row of toInsert) {
-    await db.insertInto("task").values(row).execute();
+    await db.insertInto("skill").values(row).execute();
   }
   for (const row of toUpdate) {
     await db
-      .updateTable("task")
+      .updateTable("skill")
       .set({
         title: row.title,
+        category: row.category,
         deadline: row.deadline,
         completed: row.completed,
         subtasks: row.subtasks,
@@ -160,15 +157,14 @@ export const onRequestPut: PagesFunction = async (context) => {
   }
   for (const row of toDelete) {
     await db
-      .deleteFrom("task")
+      .deleteFrom("skill")
       .where("id", "=", row.id)
       .where("user_id", "=", session.user.id)
       .execute();
   }
 
-  // Return the server's full task list after sync
   const rows = await db
-    .selectFrom("task")
+    .selectFrom("skill")
     .selectAll()
     .where("user_id", "=", session.user.id)
     .orderBy("sort_order", "asc")
@@ -176,7 +172,7 @@ export const onRequestPut: PagesFunction = async (context) => {
     .execute();
 
   return new Response(
-    JSON.stringify(rows.map(taskRowToClient)),
+    JSON.stringify(rows.map(skillRowToClient)),
     { headers: { "Content-Type": "application/json" } },
   );
 };

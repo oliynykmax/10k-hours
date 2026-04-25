@@ -1,16 +1,16 @@
 import { useEffect, useState } from "react";
 import { Target } from "lucide-react";
-import type { Task, TimerMode } from "@/lib/types";
-import { formatCountdown, formatDeadline, formatElapsed } from "@/lib/time";
-import type { Countdown } from "@/lib/time";
+import type { Skill, TimerMode } from "@/lib/types";
+import { formatElapsed, formatTotalHours } from "@/lib/time";
+import { CATEGORIES, getCurrentMilestone } from "@/lib/types";
 
 interface HeroTimerProps {
-  tasks: Task[];
+  skills: Skill[];
   mode: TimerMode;
   showLockInTip?: boolean;
 }
 
-export function HeroTimer({ tasks, mode, showLockInTip = false }: HeroTimerProps) {
+export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProps) {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -18,33 +18,29 @@ export function HeroTimer({ tasks, mode, showLockInTip = false }: HeroTimerProps
     return () => clearInterval(id);
   }, []);
 
-  const active = tasks.filter((t) => !t.completed);
-  const withDeadline = active.filter((t) => t.deadline);
-  const lockedTask = active.find((t) => t.lockedInAt !== null) ?? null;
+  const active = skills.filter((s) => !s.completed);
+  const lockedSkill = active.find((s) => s.lockedInAt !== null) ?? null;
 
-  // ── Lock-in mode ──
   if (mode === "lockin") {
-    const isIdle = !lockedTask;
-    const totalMs = lockedTask?.lockedInAt
-      ? lockedTask.timeSpentMs + (Date.now() - lockedTask.lockedInAt)
+    const isIdle = !lockedSkill;
+    const totalMs = lockedSkill?.lockedInAt
+      ? lockedSkill.timeSpentMs + (Date.now() - lockedSkill.lockedInAt)
       : 0;
     const elapsed = totalMs > 0
       ? formatElapsed(totalMs)
       : { days: "00", hours: "00", mins: "00", secs: "00" };
 
-    const isPastDeadline =
-      lockedTask?.deadline &&
-      new Date(lockedTask.deadline).getTime() <= Date.now();
+    const totalHours = formatTotalHours(totalMs);
+    const milestone = totalMs > 0 ? getCurrentMilestone(parseFloat(totalHours)) : null;
 
     return (
       <div
         className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
           isIdle
-            ? "bg-gradient-to-br from-lockin/40 via-lockin/25 to-lockin/15"
-            : "bg-gradient-to-br from-lockin/90 via-lockin-mid to-lockin-end"
+            ? "bg-gradient-to-br from-amber-500/40 via-amber-500/25 to-amber-500/15"
+            : "bg-gradient-to-br from-amber-600/90 via-orange-600 to-rose-700"
         }`}
       >
-        {/* Noise overlay */}
         <div
           className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
           style={{
@@ -53,14 +49,13 @@ export function HeroTimer({ tasks, mode, showLockInTip = false }: HeroTimerProps
             backgroundSize: "150px 150px",
           }}
         />
-        {/* Glow */}
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_35%_25%,rgba(255,255,255,0.08),transparent_55%)] pointer-events-none" />
 
         <div className="relative z-10 text-center">
-          {isIdle && (
+          {!isIdle && milestone && (
             <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-0.5 rounded-full bg-white/10 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/60 font-[family-name:var(--font-display)]">
               <Target className="size-3" />
-              locked in
+              {milestone.label} — {totalHours}h
             </div>
           )}
 
@@ -73,77 +68,36 @@ export function HeroTimer({ tasks, mode, showLockInTip = false }: HeroTimerProps
 
           {!isIdle && (
             <p className="font-[family-name:var(--font-display)] text-lg md:text-xl font-medium tracking-tight text-white/90">
-              {lockedTask?.title ?? ""}
+              {lockedSkill?.title ?? ""}
             </p>
+          )}
+          {isIdle && active.length > 0 && (
+            <p className="text-sm text-white/70 mt-2">tap the target to start practicing</p>
           )}
           {showLockInTip && isIdle && active.length > 0 && (
             <div className="mt-4 flex justify-center">
               <div className="relative inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 text-xs font-medium text-white/90 shadow-sm">
                 <Target className="size-3.5" />
-                tap the target button on a task
+                tap the target button on a skill
               </div>
             </div>
           )}
-          <div className="flex items-center justify-center gap-2 mt-1">
-            {lockedTask?.deadline && (
-              <span
-                className={`text-xs ${
-                  isPastDeadline ? "text-amber-300/80" : "text-white/60"
-                }`}
-              >
-                {isPastDeadline ? "past deadline" : formatDeadline(lockedTask.deadline)}
-              </span>
-            )}
-            {!lockedTask?.deadline && !isIdle && (
-              <span className="text-xs text-white/55">no deadline</span>
-            )}
-          </div>
         </div>
       </div>
     );
   }
 
-  // ── Countdown mode (original) ──
-  let current: Task | undefined;
-  let cd: Countdown;
-  let deadlineStr = "";
-  let isOverdue = false;
-  let isCompleted = false;
-
-  if (active.length === 0) {
-    isCompleted = true;
-    cd = { days: "00", hours: "00", mins: "00", secs: "00", overdue: false };
-  } else {
-    current =
-      withDeadline.length > 0
-        ? withDeadline.sort(
-            (a, b) =>
-              new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
-          )[0]!
-        : active[0]!;
-
-    if (current.deadline) {
-      const remaining = new Date(current.deadline).getTime() - Date.now();
-      cd = formatCountdown(remaining);
-      isOverdue = cd.overdue;
-      deadlineStr = formatDeadline(current.deadline);
-    } else {
-      cd = { days: "—", hours: "—", mins: "—", secs: "—", overdue: false };
-      deadlineStr = "no deadline";
-    }
-  }
+  const totalMs = active.reduce((sum, s) => sum + s.timeSpentMs + (s.lockedInAt ? Date.now() - s.lockedInAt : 0), 0);
+  const totalHours = formatTotalHours(totalMs);
 
   return (
     <div
       className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
-        isOverdue
-          ? "bg-gradient-to-br from-red-900/80 via-red-800/60 to-red-900/40 dark:from-red-950/80 dark:via-red-900/60 dark:to-red-950/40"
-          : isCompleted
-            ? "bg-gradient-to-br from-green-900/40 via-emerald-800/30 to-green-900/20 dark:from-green-950/50 dark:via-emerald-900/30 dark:to-green-950/20"
-            : "bg-gradient-to-br from-purple-500/90 via-violet-600 to-indigo-700 dark:from-purple-800/90 dark:via-violet-900 dark:to-indigo-950"
+        active.length === 0
+          ? "bg-gradient-to-br from-green-900/40 via-emerald-800/30 to-green-900/20 dark:from-green-950/50 dark:via-emerald-900/30 dark:to-green-950/20"
+          : "bg-gradient-to-br from-amber-500/90 via-orange-600 to-rose-700 dark:from-amber-700/90 dark:via-orange-800 dark:to-rose-900"
       }`}
     >
-      {/* Noise overlay */}
       <div
         className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
         style={{
@@ -152,49 +106,32 @@ export function HeroTimer({ tasks, mode, showLockInTip = false }: HeroTimerProps
           backgroundSize: "150px 150px",
         }}
       />
-      {/* Glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_65%_25%,rgba(255,255,255,0.1),transparent_55%)] pointer-events-none" />
 
       <div className="relative z-10 text-center">
-        {isOverdue && (
-          <div className="inline-block mb-3 px-3 py-0.5 rounded-full bg-red-500/55 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/85 font-[family-name:var(--font-display)]">
-            overdue
-          </div>
-        )}
-
-        <div className="flex items-start justify-center gap-6 md:gap-10 mb-4">
-          <DigitGroup value={cd.days} label="days" pulse={isOverdue} />
-          <DigitGroup value={cd.hours} label="hrs" pulse={isOverdue} />
-          <DigitGroup value={cd.mins} label="min" pulse={isOverdue} />
-          <DigitGroup value={cd.secs} label="sec" pulse={isOverdue} />
+        <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-0.5 rounded-full bg-white/10 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/60 font-[family-name:var(--font-display)]">
+          total practice
         </div>
 
-        <p
-          className={`font-[family-name:var(--font-display)] text-lg md:text-xl font-medium tracking-tight ${
-            isCompleted ? "text-white/60" : "text-white/90"
-          }`}
-        >
-          {isCompleted
-            ? "all done 🎉"
-            : current?.title ?? "add your first task"}
+        <p className="font-[family-name:var(--font-display)] text-[3rem] md:text-[5rem] font-bold leading-none text-white tabular-nums mb-2">
+          {totalHours}
+          <span className="text-3xl md:text-4xl text-white/60">h</span>
+        </p>
+
+        <p className="font-[family-name:var(--font-display)] text-lg md:text-xl font-medium tracking-tight text-white/90">
+          {active.length === 0
+            ? "add your first skill"
+            : `${active.length} skill${active.length > 1 ? "s" : ""} in progress`}
         </p>
         <p className="text-xs text-white/60 mt-1">
-          {isCompleted ? "" : deadlineStr}
+          toward 10,000 hours of mastery
         </p>
       </div>
     </div>
   );
 }
 
-function DigitGroup({
-  value,
-  label,
-  pulse,
-}: {
-  value: string;
-  label: string;
-  pulse: boolean;
-}) {
+function DigitGroup({ value, label, pulse }: { value: string; label: string; pulse: boolean }) {
   return (
     <div className="flex flex-col items-center w-[56px] md:w-[80px]">
       <span

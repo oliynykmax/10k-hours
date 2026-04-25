@@ -1,10 +1,10 @@
-import type { Task } from "./types";
+import type { Skill } from "./types";
 
-const STORE_KEY = "lockin_tasks";
-const THEME_KEY = "lockin_theme";
-const MODE_KEY = "lockin_mode";
-const FONT_STYLE_KEY = "lockin_font_style";
-const LOCKIN_TIP_KEY = "lockin_lockin_tip_seen";
+const STORE_KEY = "10k_skills";
+const THEME_KEY = "10k_theme";
+const MODE_KEY = "10k_mode";
+const FONT_STYLE_KEY = "10k_font_style";
+const STREAK_KEY = "10k_streak";
 
 export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -14,29 +14,29 @@ export function now(): number {
   return Date.now();
 }
 
-export function saveTasks(tasks: Task[]): void {
-  localStorage.setItem(STORE_KEY, JSON.stringify(tasks));
+export function saveSkills(skills: Skill[]): void {
+  localStorage.setItem(STORE_KEY, JSON.stringify(skills));
 }
 
-export function loadTasks(): Task[] {
+export function loadSkills(): Skill[] {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (!raw) return [];
-    const tasks: Task[] = JSON.parse(raw);
-    return tasks.map((t) => {
-      // Auto-expire stale lock-in sessions older than 4 hours
+    const skills: Skill[] = JSON.parse(raw);
+    return skills.map((s) => {
       const maxSessionMs = 4 * 60 * 60 * 1000;
-      const lockedInAt = t.lockedInAt
-        ? (Date.now() - t.lockedInAt > maxSessionMs ? null : t.lockedInAt)
+      const lockedInAt = s.lockedInAt
+        ? (Date.now() - s.lockedInAt > maxSessionMs ? null : s.lockedInAt)
         : null;
-      const timeSpentMs = t.lockedInAt && !lockedInAt
-        ? t.timeSpentMs + (Date.now() - t.lockedInAt)
-        : (t.timeSpentMs ?? 0);
+      const timeSpentMs = s.lockedInAt && !lockedInAt
+        ? s.timeSpentMs + (Date.now() - s.lockedInAt)
+        : (s.timeSpentMs ?? 0);
       return {
-        ...t,
+        ...s,
         lockedInAt,
         timeSpentMs,
-        updatedAt: t.updatedAt ?? t.createdAt,
+        updatedAt: s.updatedAt ?? s.createdAt,
+        category: s.category ?? "other",
       };
     });
   } catch {
@@ -70,6 +70,50 @@ export function loadFontStyle(): "default" | "mono" {
 export function saveFontStyle(style: "default" | "mono"): void {
   localStorage.setItem(FONT_STYLE_KEY, style);
 }
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  lastPracticeDate: string;
+}
+
+export function loadStreak(): StreakData {
+  try {
+    const raw = localStorage.getItem(STREAK_KEY);
+    if (!raw) return { currentStreak: 0, longestStreak: 0, lastPracticeDate: "" };
+    return JSON.parse(raw);
+  } catch {
+    return { currentStreak: 0, longestStreak: 0, lastPracticeDate: "" };
+  }
+}
+
+export function saveStreak(data: StreakData): void {
+  localStorage.setItem(STREAK_KEY, JSON.stringify(data));
+}
+
+export function updateStreak(): StreakData {
+  const data = loadStreak();
+  const today = new Date().toISOString().slice(0, 10);
+
+  if (data.lastPracticeDate === today) return data;
+
+  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+  if (data.lastPracticeDate === yesterday) {
+    data.currentStreak += 1;
+  } else if (data.lastPracticeDate !== today) {
+    data.currentStreak = 1;
+  }
+
+  data.lastPracticeDate = today;
+  if (data.currentStreak > data.longestStreak) {
+    data.longestStreak = data.currentStreak;
+  }
+
+  saveStreak(data);
+  return data;
+}
+
+const LOCKIN_TIP_KEY = "10k_tip_seen";
 
 function getLockInTipKey(userId: string | null): string {
   return userId ? `${LOCKIN_TIP_KEY}:${userId}` : LOCKIN_TIP_KEY;

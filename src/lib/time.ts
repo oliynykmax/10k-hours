@@ -36,6 +36,11 @@ export function formatTimerSmall(ms: number): string {
   return `${days}d ${h}h ${m}m ${s}s`;
 }
 
+export function formatTotalHours(ms: number): string {
+  const hours = ms / 3600000;
+  return hours.toFixed(1);
+}
+
 export interface Elapsed {
   days: string;
   hours: string;

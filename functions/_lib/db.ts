@@ -44,10 +44,11 @@ export interface DatabaseSchema {
     created_at: number | null;
     updated_at: number | null;
   };
-  task: {
+  skill: {
     id: string;
     user_id: string;
     title: string;
+    category: string;
     deadline: string | null;
     completed: number;
     subtasks: string;
@@ -65,10 +66,11 @@ export function createDB(d1: D1Database): Kysely<DatabaseSchema> {
   });
 }
 
-export interface TaskRow {
+export interface SkillRow {
   id: string;
   user_id: string;
   title: string;
+  category: string;
   deadline: string | null;
   completed: number;
   subtasks: string;
@@ -79,10 +81,11 @@ export interface TaskRow {
   updated_at: number;
 }
 
-export function taskRowToClient(row: TaskRow) {
+export function skillRowToClient(row: SkillRow) {
   return {
     id: row.id,
     title: row.title,
+    category: row.category,
     deadline: row.deadline,
     completed: row.completed === 1,
     subtasks: JSON.parse(row.subtasks) as Array<{ text: string; done: boolean }>,
@@ -92,4 +95,3 @@ export function taskRowToClient(row: TaskRow) {
     updatedAt: row.updated_at,
   };
 }
-
