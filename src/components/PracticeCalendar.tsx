@@ -99,6 +99,7 @@ export function PracticeCalendar() {
                   aria-label={`${day.date}: ${day.minutes} minute${day.minutes !== 1 ? "s" : ""}`}
                   tabIndex={fi === focusedIdx ? 0 : -1}
                   role="gridcell"
+                  title={`${day.date}: ${day.minutes} minute${day.minutes !== 1 ? "s" : ""}`}
                 />
               );
             })}
