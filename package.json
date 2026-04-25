@@ -8,7 +8,7 @@
     "dev:full": "wrangler pages dev --proxy=5173",
     "build": "bunx vite build",
     "preview": "bunx vite preview",
-    "deploy": "bun run build && wrangler pages deploy dist --project-name=lockin --branch=main"
+    "deploy": "bun run build && wrangler pages deploy dist --project-name=10k-hours --branch=main"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20260418.1",
