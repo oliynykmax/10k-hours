@@ -38,7 +38,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-bold uppercase tracking-wider transition-all ${
               earned
                 ? "bg-peach/20 text-peach dark:text-peach border border-peach/30"
-                : "bg-secondary text-muted-foreground/50 border border-transparent"
+                : "bg-secondary text-muted-foreground/70 border border-transparent"
             }`}
           >
             {earned ? "✓" : "○"} {def.hours}h {def.label}
