@@ -4,8 +4,8 @@ compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat_v2"]
 
 [vars]
-# Local development configuration
-BETTER_AUTH_URL = "http://localhost:8788"
+# Production configuration
+BETTER_AUTH_URL = "https://10k-hours.pages.dev"
 GOOGLE_CLIENT_ID = "3922850272-0uctcn18urtqk1np1qsqp5h00sk5b9d2.apps.googleusercontent.com"
 GITHUB_CLIENT_ID = "Ov23li5LyTOsVMrjdEzW"
 
