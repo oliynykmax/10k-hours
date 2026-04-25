@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Target } from "lucide-react";
 import type { Skill, TimerMode } from "@/lib/types";
-import { formatElapsed, formatTotalHours } from "@/lib/time";
+import { formatElapsed, formatTotalHours, formatHoursMinutes } from "@/lib/time";
 import { getCurrentMilestone } from "@/lib/types";
 
 interface HeroTimerProps {
@@ -75,8 +75,9 @@ export function HeroTimer({ skills, mode, showPracticeTip = false }: HeroTimerPr
   }
 
   const totalMs = skills.reduce((sum, s) => sum + s.timeSpentMs + (s.lockedInAt ? Date.now() - s.lockedInAt : 0), 0);
-  const totalHours = formatTotalHours(totalMs);
-  const milestone = totalMs > 0 ? getCurrentMilestone(parseFloat(totalHours)) : null;
+  const totalHoursStr = formatTotalHours(totalMs);
+  const totalDisplay = formatHoursMinutes(totalMs);
+  const milestone = totalMs > 0 ? getCurrentMilestone(parseFloat(totalHoursStr)) : null;
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-border bg-card px-8 py-10 md:px-12 md:py-12">
@@ -87,10 +88,7 @@ export function HeroTimer({ skills, mode, showPracticeTip = false }: HeroTimerPr
 
         <div className="flex items-baseline gap-2 mb-1">
           <span className="font-[family-name:var(--font-display)] text-[2.8rem] md:text-[4rem] font-bold leading-none text-foreground tabular-nums">
-            {totalHours}
-          </span>
-          <span className="text-xl md:text-2xl text-muted-foreground/60 font-[family-name:var(--font-display)] font-semibold">
-            hours
+            {totalDisplay}
           </span>
         </div>
 

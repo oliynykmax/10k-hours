@@ -41,6 +41,16 @@ export function formatTotalHours(ms: number): string {
   return hours.toFixed(1);
 }
 
+export function formatHoursMinutes(ms: number): string {
+  const totalMinutes = Math.floor(ms / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  if (hours === 0) {
+    return `${minutes}m`;
+  }
+  return `${hours}h ${minutes}m`;
+}
+
 export interface Elapsed {
   days: string;
   hours: string;

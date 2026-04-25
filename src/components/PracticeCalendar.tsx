@@ -45,10 +45,9 @@ export function PracticeCalendar() {
 
   const intensity = (minutes: number): string => {
     if (minutes === 0) return "bg-secondary/40";
-    const ratio = minutes / maxMinutes;
-    if (ratio < 0.25) return "bg-peach/20";
-    if (ratio < 0.5) return "bg-peach/40";
-    if (ratio < 0.75) return "bg-peach/60";
+    if (minutes < 5) return "bg-peach/20";
+    if (minutes < 15) return "bg-peach/40";
+    if (minutes < 30) return "bg-peach/60";
     return "bg-peach";
   };
 

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Award, Zap, Target } from "lucide-react";
 import type { Skill } from "@/lib/types";
 import { getCurrentMilestone, getNextMilestone, levelForXp, xpForHours } from "@/lib/types";
-import { formatTotalHours } from "@/lib/time";
+import { formatTotalHours, formatHoursMinutes } from "@/lib/time";
 
 interface StatsBarProps {
   skills: Skill[];
@@ -20,19 +20,20 @@ export function StatsBar({ skills }: StatsBarProps) {
     const lockedExtra = s.lockedInAt ? Date.now() - s.lockedInAt : 0;
     return sum + s.timeSpentMs + lockedExtra;
   }, 0);
-  const totalHours = formatTotalHours(totalMs);
+  const totalHoursStr = formatTotalHours(totalMs);
+  const totalDisplay = formatHoursMinutes(totalMs);
   const xp = skills.reduce((sum, s) => {
     const lockedExtra = s.lockedInAt ? Date.now() - s.lockedInAt : 0;
     return sum + xpForHours(s.timeSpentMs + lockedExtra);
   }, 0);
   const { level } = levelForXp(xp);
-  const milestone = getCurrentMilestone(parseFloat(totalHours));
-  const next = getNextMilestone(parseFloat(totalHours));
+  const milestone = getCurrentMilestone(parseFloat(totalHoursStr));
+  const next = getNextMilestone(parseFloat(totalHoursStr));
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
       <StatCard icon={<Zap className="size-4" />} label="Level" value={String(level)} sub={milestone.label} />
-      <StatCard icon={<Award className="size-4" />} label="Total Hours" value={totalHours} sub={next ? `${next.hours}h to next` : "maxed!"} />
+      <StatCard icon={<Award className="size-4" />} label="Total Hours" value={totalDisplay} sub={next ? `${next.hours}h to next` : "maxed!"} />
       <StatCard icon={<Target className="size-4" />} label="Skills" value={String(skills.length)} sub={`active`} />
     </div>
   );

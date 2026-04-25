@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Skill } from "@/lib/types";
 import { getCurrentMilestone } from "@/lib/types";
-import { formatTotalHours } from "@/lib/time";
+import { formatTotalHours, formatHoursMinutes } from "@/lib/time";
 
 interface SkillItemProps {
   skill: Skill;
@@ -134,7 +134,7 @@ export function SkillItem({
                 </span>
               )}
               <span className="ml-auto font-[family-name:var(--font-display)] text-sm font-bold tabular-nums tracking-wide text-primary">
-                {formatTotalHours(totalMs)}h
+                {formatHoursMinutes(totalMs)}
               </span>
             </div>
 
