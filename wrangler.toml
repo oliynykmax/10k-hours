@@ -4,10 +4,25 @@ compatibility_date = "2025-04-01"
 compatibility_flags = ["nodejs_compat_v2"]
 
 [vars]
-BETTER_AUTH_URL = "https://10k-hours.pages.dev"
+# Local development configuration
+BETTER_AUTH_URL = "http://localhost:8788"
+GOOGLE_CLIENT_ID = "3922850272-0uctcn18urtqk1np1qsqp5h00sk5b9d2.apps.googleusercontent.com"
+GITHUB_CLIENT_ID = "Ov23li5LyTOsVMrjdEzW"
 
 [[d1_databases]]
 binding = "DB"
 database_name = "10k-hours-db"
 database_id = "30589d68-5664-4f89-8ae5-1d1fb59f6983"
 preview_database_id = "30589d68-5664-4f89-8ae5-1d1fb59f6983"
+
+# Production configuration - Set these in Cloudflare Pages dashboard:
+# 
+# Environment Variables (not secrets):
+#   BETTER_AUTH_URL = "https://10k-hours.pages.dev"
+#   GOOGLE_CLIENT_ID = "3922850272-0uctcn18urtqk1np1qsqp5h00sk5b9d2.apps.googleusercontent.com"
+#   GITHUB_CLIENT_ID = "Ov23li5LyTOsVMrjdEzW"
+#
+# Secrets (encrypted):
+#   BETTER_AUTH_SECRET = "your-secret-here"
+#   GOOGLE_CLIENT_SECRET = "your-google-client-secret"
+#   GITHUB_CLIENT_SECRET = "your-github-client-secret"

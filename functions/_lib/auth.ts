@@ -13,11 +13,15 @@ export function createAuth(env: {
 }) {
   const db = createDB(env.DB);
 
+  // Determine the base URL for OAuth callbacks
+  // In production, this MUST be set via Cloudflare Pages environment variables
+  const baseURL = env.BETTER_AUTH_URL || "http://localhost:8788";
+  
   return betterAuth({
     database: kyselyAdapter(db, { type: "sqlite" }),
     secret: env.BETTER_AUTH_SECRET,
-    baseURL: env.BETTER_AUTH_URL,
-    trustedOrigins: env.BETTER_AUTH_URL ? [env.BETTER_AUTH_URL] : ["http://localhost:8788"],
+    baseURL: baseURL,
+    trustedOrigins: [baseURL],
     user: {
       fields: {
         emailVerified: "email_verified",
