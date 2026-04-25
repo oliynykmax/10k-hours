@@ -29,11 +29,15 @@ export function StatsBar({ skills }: StatsBarProps) {
   const { level } = levelForXp(xp);
   const milestone = getCurrentMilestone(parseFloat(totalHoursStr));
   const next = getNextMilestone(parseFloat(totalHoursStr));
+  
+  // Calculate remaining time to next milestone
+  const remainingMs = next ? (next.hours * 3600000) - totalMs : 0;
+  const remainingDisplay = remainingMs > 0 ? formatHoursMinutes(remainingMs) : null;
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
       <StatCard icon={<Zap className="size-4" />} label="Level" value={String(level)} sub={milestone.label} />
-      <StatCard icon={<Award className="size-4" />} label="Total Time" value={totalDisplay} sub={next ? `${next.hours}h to next` : "maxed!"} />
+      <StatCard icon={<Award className="size-4" />} label="Total Time" value={totalDisplay} sub={remainingDisplay ? `${remainingDisplay} to next` : "maxed!"} />
       <StatCard icon={<Target className="size-4" />} label="Skills" value={String(skills.length)} sub={`active`} />
     </div>
   );
