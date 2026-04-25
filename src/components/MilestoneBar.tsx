@@ -8,7 +8,7 @@ interface MilestoneBarProps {
 
 export function MilestoneBar({ skills }: MilestoneBarProps) {
   const totalMs = skills.reduce((sum, s) => {
-    const lockedExtra = s.lockedInAt && !s.completed ? Date.now() - s.lockedInAt : 0;
+    const lockedExtra = s.lockedInAt ? Date.now() - s.lockedInAt : 0;
     return sum + s.timeSpentMs + lockedExtra;
   }, 0);
   const totalHours = parseFloat(formatTotalHours(totalMs));
@@ -26,7 +26,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
 
       <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 rounded-full transition-all duration-1000"
+          className="h-full bg-gradient-to-r from-lockin via-lockin-mid to-lockin-end rounded-full transition-all duration-1000"
           style={{ width: `${progressPct}%` }}
         />
       </div>
@@ -37,7 +37,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
             key={def.hours}
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-bold uppercase tracking-wider transition-all ${
               earned
-                ? "bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30"
+                ? "bg-lockin/20 text-lockin dark:text-lockin border border-lockin/30"
                 : "bg-secondary text-muted-foreground/50 border border-transparent"
             }`}
           >

@@ -36,3 +36,6 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # Wrangler local state
 .wrangler
 .dev.vars
+
+# Build artifacts
+_worker.bundle

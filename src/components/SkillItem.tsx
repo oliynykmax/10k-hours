@@ -4,18 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { DateTimePicker } from "@/components/DateTimePicker";
 import { cn } from "@/lib/utils";
-import type { Skill, SkillCategory } from "@/lib/types";
-import { CATEGORIES, getCurrentMilestone, getNextMilestone, MILESTONES } from "@/lib/types";
-import { formatTotalHours, dateToLocalISO } from "@/lib/time";
+import type { Skill } from "@/lib/types";
+import { getCurrentMilestone } from "@/lib/types";
+import { formatTotalHours } from "@/lib/time";
 
 interface SkillItemProps {
   skill: Skill;
   index: number;
   total: number;
-  onComplete: (id: string) => void;
-  onEdit: (id: string, updates: Partial<Pick<Skill, "title" | "deadline" | "category">>) => void;
+  onEdit: (id: string, updates: Partial<Pick<Skill, "title">>) => void;
   onDelete: (id: string) => void;
   onMove: (id: string, direction: number) => void;
   onAddSubtask: (skillId: string, text: string) => void;
@@ -25,15 +23,10 @@ interface SkillItemProps {
   onLockOut: (id: string) => void;
 }
 
-const categoryEmoji: Record<SkillCategory, string> = {
-  dev: "💻", art: "🎨", music: "🎵", sport: "🏋️", language: "🌍", other: "⭐",
-};
-
 export function SkillItem({
   skill,
   index,
   total,
-  onComplete,
   onEdit,
   onDelete,
   onMove,
@@ -46,18 +39,12 @@ export function SkillItem({
   const [, setTick] = useState(0);
   const [editing, setEditing] = useState(false);
   const [editTitle, setEditTitle] = useState(skill.title);
-  const [editCategory, setEditCategory] = useState(skill.category);
-  const [editDeadline, setEditDeadline] = useState<Date | undefined>(
-    skill.deadline ? new Date(skill.deadline) : undefined
-  );
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (!skill.completed) {
-      const id = setInterval(() => setTick((n) => n + 1), 1000);
-      return () => clearInterval(id);
-    }
-  }, [skill.completed]);
+    const id = setInterval(() => setTick((n) => n + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (editing) {
@@ -69,12 +56,10 @@ export function SkillItem({
   useEffect(() => {
     if (!editing) {
       setEditTitle(skill.title);
-      setEditCategory(skill.category);
-      setEditDeadline(skill.deadline ? new Date(skill.deadline) : undefined);
     }
-  }, [skill.title, skill.category, skill.deadline, editing]);
+  }, [skill.title, editing]);
 
-  const totalMs = skill.lockedInAt && !skill.completed
+  const totalMs = skill.lockedInAt
     ? skill.timeSpentMs + (Date.now() - skill.lockedInAt)
     : skill.timeSpentMs;
   const totalHours = parseFloat(formatTotalHours(totalMs));
@@ -90,15 +75,12 @@ export function SkillItem({
 
   const handleSaveEdit = () => {
     if (!editTitle.trim()) return;
-    const deadlineStr = editDeadline ? dateToLocalISO(editDeadline) : null;
-    onEdit(skill.id, { title: editTitle.trim(), deadline: deadlineStr, category: editCategory });
+    onEdit(skill.id, { title: editTitle.trim() });
     setEditing(false);
   };
 
   const handleCancelEdit = () => {
     setEditTitle(skill.title);
-    setEditCategory(skill.category);
-    setEditDeadline(skill.deadline ? new Date(skill.deadline) : undefined);
     setEditing(false);
   };
 
@@ -107,8 +89,7 @@ export function SkillItem({
       className={cn(
         "group bg-card border border-border rounded-xl px-4 py-4 transition-all animate-task-enter",
         "hover:border-border/80 hover:shadow-md",
-        skill.completed && "opacity-60",
-        skill.lockedInAt && !skill.completed && "border-amber-500/60 bg-amber-500/5 dark:bg-amber-500/10"
+        skill.lockedInAt && "border-lockin/60 bg-lockin/5 dark:bg-lockin/10"
       )}
     >
       {editing ? (
@@ -124,16 +105,6 @@ export function SkillItem({
             aria-label="Skill name"
             className="h-9 text-base font-semibold bg-secondary/50 border-primary/20 focus-visible:border-primary"
           />
-          <select
-            value={editCategory}
-            onChange={(e) => setEditCategory(e.target.value as SkillCategory)}
-            className="flex h-9 w-full rounded-lg border border-input bg-secondary/50 px-3 py-1 text-sm shadow-xs transition-colors focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-ring"
-          >
-            {CATEGORIES.map((c) => (
-              <option key={c.value} value={c.value}>{c.emoji} {c.label}</option>
-            ))}
-          </select>
-          <DateTimePicker value={editDeadline} onChange={setEditDeadline} />
           <div className="flex gap-2 justify-end pt-1">
             <Button size="sm" onClick={handleSaveEdit} className="rounded-full font-semibold shadow-sm">
               <Check className="size-3.5" />
@@ -146,41 +117,18 @@ export function SkillItem({
         </div>
       ) : (
         <div className="flex items-start gap-3">
-          <button
-            onClick={() => onComplete(skill.id)}
-            className={cn(
-              "mt-0.5 flex-shrink-0 w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300",
-              skill.completed
-                ? "bg-primary border-primary animate-check-pop"
-                : "border-primary/40 hover:border-primary hover:bg-primary/10 hover:scale-110 active:scale-90"
-            )}
-            aria-label={skill.completed ? "Mark incomplete" : "Master skill"}
-            aria-pressed={skill.completed}
-          >
-            {skill.completed && (
-              <svg viewBox="0 0 16 16" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5">
-                <polyline points="3.5 8.5 6.5 11.5 12.5 5.5" />
-              </svg>
-            )}
-          </button>
 
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm">{categoryEmoji[skill.category]}</span>
-              <span
-                className={cn(
-                  "font-[family-name:var(--font-display)] text-base font-semibold tracking-tight",
-                  skill.completed && "line-through text-muted-foreground"
-                )}
-              >
+              <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight">
                 {skill.title}
               </span>
               <Badge variant="secondary" className="text-[0.55rem] font-bold uppercase tracking-wider">
                 {milestone.label}
               </Badge>
-              {skill.lockedInAt && !skill.completed && (
-                <span className="inline-flex items-center gap-1 text-[0.6rem] font-bold tracking-[0.12em] uppercase text-amber-500 font-[family-name:var(--font-display)]">
-                  <span className="size-1.5 rounded-full bg-amber-500 animate-pulse" />
+              {skill.lockedInAt && (
+                <span className="inline-flex items-center gap-1 text-[0.6rem] font-bold tracking-[0.12em] uppercase text-lockin font-[family-name:var(--font-display)]">
+                  <span className="size-1.5 rounded-full bg-lockin animate-pulse" />
                   practicing
                 </span>
               )}
@@ -192,7 +140,7 @@ export function SkillItem({
             <div className="flex items-center gap-2 mt-1">
               <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-1000"
+                  className="h-full bg-gradient-to-r from-lockin via-lockin-mid to-lockin-end rounded-full transition-all duration-1000"
                   style={{ width: `${Math.min((totalHours / 10000) * 100, 100)}%` }}
                 />
               </div>
@@ -221,7 +169,7 @@ export function SkillItem({
               </div>
             )}
 
-            {!skill.completed && (
+            {true && (
               <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/60">
                 <Input
                   value={subtaskInput}
@@ -241,28 +189,24 @@ export function SkillItem({
           </div>
 
           <div className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
-            {!skill.completed && (
-              <>
-                {skill.lockedInAt ? (
-                  <Button variant="ghost" size="icon-sm" onClick={() => onLockOut(skill.id)} className="text-amber-500 hover:text-amber-500/80 hover:bg-amber-500/10" aria-label="Stop practicing" aria-pressed="true">
-                    <Square className="size-4" />
-                  </Button>
-                ) : (
-                  <Button variant="ghost" size="icon-sm" onClick={() => onLockIn(skill.id)} className="text-muted-foreground hover:text-amber-500 hover:bg-amber-500/10" aria-label="Start practicing" aria-pressed="false">
-                    <Target className="size-4" />
-                  </Button>
-                )}
-                <Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit skill">
-                  <Pencil className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => onMove(skill.id, -1)} className="text-muted-foreground" aria-label="Move up">
-                  <ChevronUp className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon-sm" disabled={index >= total - 1} onClick={() => onMove(skill.id, 1)} className="text-muted-foreground" aria-label="Move down">
-                  <ChevronDown className="size-4" />
-                </Button>
-              </>
+            {skill.lockedInAt ? (
+              <Button variant="ghost" size="icon-sm" onClick={() => onLockOut(skill.id)} className="text-lockin hover:text-lockin/80 hover:bg-lockin/10" aria-label="Stop practicing" aria-pressed="true">
+                <Square className="size-4" />
+              </Button>
+            ) : (
+              <Button variant="ghost" size="icon-sm" onClick={() => onLockIn(skill.id)} className="text-muted-foreground hover:text-lockin hover:bg-lockin/10" aria-label="Start practicing" aria-pressed="false">
+                <Target className="size-4" />
+              </Button>
             )}
+            <Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit skill">
+              <Pencil className="size-4" />
+            </Button>
+            <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => onMove(skill.id, -1)} className="text-muted-foreground" aria-label="Move up">
+              <ChevronUp className="size-4" />
+            </Button>
+            <Button variant="ghost" size="icon-sm" disabled={index >= total - 1} onClick={() => onMove(skill.id, 1)} className="text-muted-foreground" aria-label="Move down">
+              <ChevronDown className="size-4" />
+            </Button>
             <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-overdue hover:bg-overdue-bg" onClick={() => onDelete(skill.id)} aria-label="Delete skill">
               <Trash2 className="size-4" />
             </Button>
@@ -270,7 +214,7 @@ export function SkillItem({
         </div>
       )}
 
-      {skill.subtasks.length > 0 && !skill.completed && !editing && (
+      {skill.subtasks.length > 0 && !editing && (
         <div className="mt-2 ml-10">
           <Badge variant="secondary" className="text-[0.65rem] font-medium">
             {skill.subtasks.filter((s) => s.done).length}/{skill.subtasks.length} done

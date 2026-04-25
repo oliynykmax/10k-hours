@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Flame, Award, Zap, Target } from "lucide-react";
+import { Award, Zap, Target } from "lucide-react";
 import type { Skill } from "@/lib/types";
 import { getCurrentMilestone, getNextMilestone, levelForXp, xpForHours } from "@/lib/types";
 import { formatTotalHours } from "@/lib/time";
-import { loadStreak } from "@/lib/store";
 
 interface StatsBarProps {
   skills: Skill[];
@@ -11,16 +10,14 @@ interface StatsBarProps {
 
 export function StatsBar({ skills }: StatsBarProps) {
   const [, setTick] = useState(0);
-  const streak = loadStreak();
 
   useEffect(() => {
     const id = setInterval(() => setTick((n) => n + 1), 1000);
     return () => clearInterval(id);
   }, []);
 
-  const activeSkills = skills.filter((s) => !s.completed);
   const totalMs = skills.reduce((sum, s) => {
-    const lockedExtra = s.lockedInAt && !s.completed ? Date.now() - s.lockedInAt : 0;
+    const lockedExtra = s.lockedInAt ? Date.now() - s.lockedInAt : 0;
     return sum + s.timeSpentMs + lockedExtra;
   }, 0);
   const totalHours = formatTotalHours(totalMs);
@@ -28,14 +25,12 @@ export function StatsBar({ skills }: StatsBarProps) {
   const { level } = levelForXp(xp);
   const milestone = getCurrentMilestone(parseFloat(totalHours));
   const next = getNextMilestone(parseFloat(totalHours));
-  const mastered = skills.filter((s) => s.completed).length;
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-2.5">
       <StatCard icon={<Zap className="size-4" />} label="Level" value={String(level)} sub={milestone.label} />
       <StatCard icon={<Award className="size-4" />} label="Total Hours" value={totalHours} sub={next ? `${next.hours}h to next` : "maxed!"} />
-      <StatCard icon={<Flame className="size-4" />} label="Streak" value={`${streak.currentStreak} days`} sub={`best: ${streak.longestStreak}`} />
-      <StatCard icon={<Target className="size-4" />} label="Skills" value={String(activeSkills.length)} sub={`${mastered} mastered`} />
+      <StatCard icon={<Target className="size-4" />} label="Skills" value={String(skills.length)} sub={`active`} />
     </div>
   );
 }

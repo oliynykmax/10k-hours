@@ -58,6 +58,13 @@ export interface DatabaseSchema {
     sort_order: number;
     updated_at: number;
   };
+  practice_log: {
+    id: string;
+    user_id: string;
+    date: string;
+    minutes: number;
+    updated_at: number;
+  };
 }
 
 export function createDB(d1: D1Database): Kysely<DatabaseSchema> {

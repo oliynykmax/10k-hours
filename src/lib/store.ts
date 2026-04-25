@@ -4,7 +4,7 @@ const STORE_KEY = "10k_skills";
 const THEME_KEY = "10k_theme";
 const MODE_KEY = "10k_mode";
 const FONT_STYLE_KEY = "10k_font_style";
-const STREAK_KEY = "10k_streak";
+const LOCKIN_TIP_KEY = "10k_tip_seen";
 
 export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -36,7 +36,6 @@ export function loadSkills(): Skill[] {
         lockedInAt,
         timeSpentMs,
         updatedAt: s.updatedAt ?? s.createdAt,
-        category: s.category ?? "other",
       };
     });
   } catch {
@@ -70,50 +69,6 @@ export function loadFontStyle(): "default" | "mono" {
 export function saveFontStyle(style: "default" | "mono"): void {
   localStorage.setItem(FONT_STYLE_KEY, style);
 }
-
-export interface StreakData {
-  currentStreak: number;
-  longestStreak: number;
-  lastPracticeDate: string;
-}
-
-export function loadStreak(): StreakData {
-  try {
-    const raw = localStorage.getItem(STREAK_KEY);
-    if (!raw) return { currentStreak: 0, longestStreak: 0, lastPracticeDate: "" };
-    return JSON.parse(raw);
-  } catch {
-    return { currentStreak: 0, longestStreak: 0, lastPracticeDate: "" };
-  }
-}
-
-export function saveStreak(data: StreakData): void {
-  localStorage.setItem(STREAK_KEY, JSON.stringify(data));
-}
-
-export function updateStreak(): StreakData {
-  const data = loadStreak();
-  const today = new Date().toISOString().slice(0, 10);
-
-  if (data.lastPracticeDate === today) return data;
-
-  const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-  if (data.lastPracticeDate === yesterday) {
-    data.currentStreak += 1;
-  } else if (data.lastPracticeDate !== today) {
-    data.currentStreak = 1;
-  }
-
-  data.lastPracticeDate = today;
-  if (data.currentStreak > data.longestStreak) {
-    data.longestStreak = data.currentStreak;
-  }
-
-  saveStreak(data);
-  return data;
-}
-
-const LOCKIN_TIP_KEY = "10k_tip_seen";
 
 function getLockInTipKey(userId: string | null): string {
   return userId ? `${LOCKIN_TIP_KEY}:${userId}` : LOCKIN_TIP_KEY;

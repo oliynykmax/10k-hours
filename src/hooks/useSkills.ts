@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import type { Skill, SkillCategory } from "@/lib/types";
-import { uid, now, saveSkills, loadSkills, updateStreak } from "@/lib/store";
+import type { Skill } from "@/lib/types";
+import { uid, now, saveSkills, loadSkills } from "@/lib/store";
+import { recordPractice } from "@/lib/practice-log";
 import { useSession } from "@/lib/auth-client";
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
@@ -67,7 +68,7 @@ export function useSkills() {
 
         const reconciled: Skill[] = await apiFetch("/skills", {
           method: "PUT",
-          body: JSON.stringify({ tasks: merged }),
+          body: JSON.stringify({ skills: merged }),
         });
 
         setSkills(reconciled);
@@ -102,7 +103,7 @@ export function useSkills() {
       try {
         const serverSkills: Skill[] = await apiFetch("/skills", {
           method: "PUT",
-          body: JSON.stringify({ tasks: skillsRef.current }),
+          body: JSON.stringify({ skills: skillsRef.current }),
         });
         skipSyncRef.current = true;
         setSkills(serverSkills);
@@ -116,14 +117,11 @@ export function useSkills() {
     };
   }, [skills, userId]);
 
-  const addSkill = useCallback((title: string, category: SkillCategory, deadline: string | null) => {
+  const addSkill = useCallback((title: string) => {
     const t = now();
     const skill: Skill = {
       id: uid(),
       title: title.trim(),
-      category,
-      deadline,
-      completed: false,
       subtasks: [],
       createdAt: t,
       lockedInAt: null,
@@ -133,21 +131,7 @@ export function useSkills() {
     setSkills((prev) => [...prev, skill]);
   }, []);
 
-  const completeSkill = useCallback((id: string) => {
-    setSkills((prev) =>
-      prev.map((s) =>
-        s.id === id ? {
-          ...s,
-          completed: !s.completed,
-          lockedInAt: null,
-          timeSpentMs: s.lockedInAt ? s.timeSpentMs + (now() - s.lockedInAt) : s.timeSpentMs,
-          updatedAt: now(),
-        } : s
-      )
-    );
-  }, []);
-
-  const editSkill = useCallback((id: string, updates: Partial<Pick<Skill, "title" | "deadline" | "category">>) => {
+  const editSkill = useCallback((id: string, updates: Partial<Pick<Skill, "title">>) => {
     setSkills((prev) =>
       prev.map((s) => (s.id === id ? { ...s, ...updates, updatedAt: now() } : s))
     );
@@ -209,10 +193,8 @@ export function useSkills() {
 
   const lockIn = useCallback((id: string) => {
     const t = now();
-    updateStreak();
     setSkills((prev) =>
       prev.map((skill) => {
-        if (skill.completed) return skill;
         if (skill.id === id) return { ...skill, lockedInAt: t, updatedAt: t };
         if (skill.lockedInAt !== null) return { ...skill, lockedInAt: null, timeSpentMs: skill.timeSpentMs + (t - skill.lockedInAt), updatedAt: t };
         return skill;
@@ -223,11 +205,14 @@ export function useSkills() {
   const lockOut = useCallback((id: string) => {
     const t = now();
     setSkills((prev) =>
-      prev.map((skill) =>
-        skill.id === id
-          ? { ...skill, lockedInAt: null, timeSpentMs: skill.lockedInAt ? skill.timeSpentMs + (t - skill.lockedInAt) : skill.timeSpentMs, updatedAt: t }
-          : skill
-      )
+      prev.map((skill) => {
+        if (skill.id === id) {
+          const sessionMs = skill.lockedInAt ? t - skill.lockedInAt : 0;
+          if (sessionMs > 0) recordPractice(sessionMs);
+          return { ...skill, lockedInAt: null, timeSpentMs: skill.timeSpentMs + sessionMs, updatedAt: t };
+        }
+        return skill;
+      })
     );
   }, []);
 
@@ -235,7 +220,6 @@ export function useSkills() {
     skills,
     addSkill,
     editSkill,
-    completeSkill,
     deleteSkill,
     moveSkill,
     addSubtask,

@@ -1,5 +1,3 @@
-export type SkillCategory = "dev" | "art" | "music" | "sport" | "language" | "other";
-
 export interface Subtask {
   text: string;
   done: boolean;
@@ -8,9 +6,6 @@ export interface Subtask {
 export interface Skill {
   id: string;
   title: string;
-  category: SkillCategory;
-  deadline: string | null;
-  completed: boolean;
   subtasks: Subtask[];
   createdAt: number;
   lockedInAt: number | null;
@@ -31,15 +26,6 @@ export const MILESTONES: MilestoneDef[] = [
   { hours: 1000, label: "Expert" },
   { hours: 5000, label: "Master" },
   { hours: 10000, label: "Grandmaster" },
-];
-
-export const CATEGORIES: { value: SkillCategory; label: string; emoji: string }[] = [
-  { value: "dev", label: "Development", emoji: "💻" },
-  { value: "art", label: "Art & Design", emoji: "🎨" },
-  { value: "music", label: "Music", emoji: "🎵" },
-  { value: "sport", label: "Sports", emoji: "🏋️" },
-  { value: "language", label: "Language", emoji: "🌍" },
-  { value: "other", label: "Other", emoji: "⭐" },
 ];
 
 export function getMilestonesFor(hours: number): { def: MilestoneDef; earned: boolean }[] {

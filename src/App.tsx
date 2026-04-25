@@ -7,6 +7,7 @@ import { AddSkillForm } from "@/components/AddSkillForm";
 import { SkillItem } from "@/components/SkillItem";
 import { StatsBar } from "@/components/StatsBar";
 import { MilestoneBar } from "@/components/MilestoneBar";
+import { PracticeCalendar } from "@/components/PracticeCalendar";
 import { useSkills } from "@/hooks/useSkills";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,6 @@ export default function App() {
     skills,
     addSkill,
     editSkill,
-    completeSkill,
     deleteSkill,
     moveSkill,
     addSubtask,
@@ -41,7 +41,7 @@ export default function App() {
 
   const setTimerMode = useCallback((m: TimerMode) => {
     if (m === "countdown") {
-      const locked = skills.find((t) => t.lockedInAt && !t.completed);
+      const locked = skills.find((t) => t.lockedInAt);
       if (locked) lockOut(locked.id);
     }
     _setTimerMode(m);
@@ -60,8 +60,7 @@ export default function App() {
     setTimerMode("countdown");
   }, [setTimerMode]);
 
-  const activeSkills = skills.filter((s) => !s.completed);
-  const completedSkills = skills.filter((s) => s.completed);
+  const hasSkills = skills.length > 0;
 
   return (
     <div className="max-w-[1080px] mx-auto px-4 md:px-8 h-dvh flex flex-col overflow-hidden">
@@ -70,7 +69,7 @@ export default function App() {
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <div className="mr-auto min-w-0">
               <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight text-foreground md:text-[1.9rem]">
-                10k<span className="text-amber-500">h</span>
+                10k<span className="text-lockin">h</span>
               </h1>
             </div>
 
@@ -95,7 +94,7 @@ export default function App() {
                   className={cn(
                     "flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
                     mode === "lockin"
-                      ? "bg-amber-500 text-white shadow-sm"
+                      ? "bg-lockin text-lockin-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
                   aria-pressed={mode === "lockin"}
@@ -149,6 +148,7 @@ export default function App() {
             <>
               <StatsBar skills={skills} />
               <MilestoneBar skills={skills} />
+              {hasSkills && <PracticeCalendar />}
             </>
           )}
         </section>
@@ -159,30 +159,12 @@ export default function App() {
           </div>
 
           <div className="task-scroll flex-1 overflow-y-auto space-y-2.5 min-h-0 py-1 pr-2">
-            {activeSkills.map((skill, i) => (
+            {skills.map((skill, i) => (
               <SkillItem
                 key={skill.id}
                 skill={skill}
                 index={i}
-                total={activeSkills.length}
-                onComplete={completeSkill}
-                onEdit={editSkill}
-                onDelete={deleteSkill}
-                onMove={moveSkill}
-                onAddSubtask={addSubtask}
-                onToggleSubtask={toggleSubtask}
-                onDeleteSubtask={deleteSubtask}
-                onLockIn={handleLockIn}
-                onLockOut={handleLockOut}
-              />
-            ))}
-            {completedSkills.map((skill) => (
-              <SkillItem
-                key={skill.id}
-                skill={skill}
-                index={-1}
-                total={-1}
-                onComplete={completeSkill}
+                total={skills.length}
                 onEdit={editSkill}
                 onDelete={deleteSkill}
                 onMove={moveSkill}
@@ -194,7 +176,7 @@ export default function App() {
               />
             ))}
 
-            {skills.length === 0 && (
+            {!hasSkills && (
               <div className="text-center py-12">
                 <div className="text-muted-foreground/40 mb-3 flex justify-center">
                   <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">

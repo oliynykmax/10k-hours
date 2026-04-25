@@ -78,64 +78,68 @@
 
 @layer base {
   :root {
-    --background: oklch(96% 0.018 70);
-    --foreground: oklch(22% 0.04 55);
-    --card: oklch(98% 0.008 70);
-    --card-foreground: oklch(22% 0.04 55);
-    --popover: oklch(98% 0.008 70);
-    --popover-foreground: oklch(22% 0.04 55);
-    --primary: oklch(55% 0.26 290);
-    --primary-foreground: oklch(98% 0 0);
-    --secondary: oklch(93% 0.024 70);
-    --secondary-foreground: oklch(30% 0.04 55);
-    --muted: oklch(93% 0.024 70);
-    --muted-foreground: oklch(40% 0.05 55);
-    --accent: oklch(90% 0.06 290);
-    --accent-foreground: oklch(30% 0.04 55);
-    --destructive: oklch(62% 0.22 25);
-    --destructive-foreground: oklch(98% 0 0);
-    --border: oklch(40% 0.03 55 / 0.12);
-    --input: oklch(40% 0.03 55 / 0.18);
-    --ring: oklch(55% 0.26 290);
+    /* Catppuccin Latte */
+    --background: #eff1f5;
+    --foreground: #4c4f69;
+    --card: #e6e9ef;
+    --card-foreground: #4c4f69;
+    --popover: #e6e9ef;
+    --popover-foreground: #4c4f69;
+    --primary: #7287fd;
+    --primary-foreground: #eff1f5;
+    --secondary: #ccd0da;
+    --secondary-foreground: #5c5f77;
+    --muted: #dce0e8;
+    --muted-foreground: #8c8fa1;
+    --accent: #8839ef;
+    --accent-foreground: #4c4f69;
+    --destructive: #d20f39;
+    --destructive-foreground: #eff1f5;
+    --border: #bcc0cc;
+    --input: #bcc0cc;
+    --ring: #7287fd;
     --radius: 0.75rem;
-    --overdue: oklch(62% 0.22 25);
-    --overdue-bg: oklch(62% 0.22 25 / 0.08);
-    --lockin: oklch(62% 0.19 160);
-    --lockin-bg: oklch(62% 0.19 160 / 0.08);
-    --lockin-foreground: oklch(98% 0 0);
-    --lockin-mid: oklch(52% 0.14 175);
-    --lockin-end: oklch(48% 0.11 195);
+    --overdue: #d20f39;
+    --overdue-bg: #d20f3918;
+    --lockin: #fe640b;
+    --lockin-bg: #fe640b18;
+    --lockin-foreground: #eff1f5;
+    --lockin-mid: #e64553;
+    --lockin-end: #dd7878;
   }
 
   .dark {
-    --background: oklch(12% 0.035 290);
-    --foreground: oklch(93% 0.02 290);
-    --card: oklch(18% 0.05 290);
-    --card-foreground: oklch(93% 0.02 290);
-    --popover: oklch(18% 0.05 290);
-    --popover-foreground: oklch(93% 0.02 290);
-    --primary: oklch(75% 0.18 290);
-    --primary-foreground: oklch(12% 0.035 290);
-    --secondary: oklch(16% 0.045 290);
-    --secondary-foreground: oklch(93% 0.02 290);
-    --muted: oklch(16% 0.045 290);
-    --muted-foreground: oklch(75% 0.12 290);
-    --accent: oklch(22% 0.06 290);
-    --accent-foreground: oklch(93% 0.02 290);
-    --destructive: oklch(70% 0.2 25);
-    --destructive-foreground: oklch(98% 0 0);
-    --border: oklch(75% 0.18 290 / 0.08);
-    --input: oklch(75% 0.18 290 / 0.14);
-    --ring: oklch(75% 0.18 290);
-    --overdue: oklch(70% 0.2 25);
-    --overdue-bg: oklch(70% 0.2 25 / 0.1);
-    --lockin: oklch(72% 0.17 160);
-    --lockin-bg: oklch(72% 0.17 160 / 0.12);
-    --lockin-foreground: oklch(12% 0.035 290);
-    --lockin-mid: oklch(45% 0.12 175);
-    --lockin-end: oklch(38% 0.10 195);
+    /* Catppuccin Mocha */
+    --background: #1e1e2e;
+    --foreground: #cdd6f4;
+    --card: #181825;
+    --card-foreground: #cdd6f4;
+    --popover: #181825;
+    --popover-foreground: #cdd6f4;
+    --primary: #b4befe;
+    --primary-foreground: #1e1e2e;
+    --secondary: #313244;
+    --secondary-foreground: #bac2de;
+    --muted: #11111b;
+    --muted-foreground: #6c7086;
+    --accent: #cba6f7;
+    --accent-foreground: #cdd6f4;
+    --destructive: #f38ba8;
+    --destructive-foreground: #1e1e2e;
+    --border: #45475a;
+    --input: #45475a;
+    --ring: #b4befe;
+    --overdue: #f38ba8;
+    --overdue-bg: #f38ba818;
+    --lockin: #fab387;
+    --lockin-bg: #fab38718;
+    --lockin-foreground: #1e1e2e;
+    --lockin-mid: #eba0ac;
+    --lockin-end: #f5c2e7;
   }
 }
+
+
 
 @layer base {
   * {

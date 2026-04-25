@@ -9,5 +9,5 @@ BETTER_AUTH_URL = "https://10k-hours.pages.dev"
 [[d1_databases]]
 binding = "DB"
 database_name = "10k-hours-db"
-database_id = ""
-preview_database_id = "DB"
+database_id = "30589d68-5664-4f89-8ae5-1d1fb59f6983"
+preview_database_id = "30589d68-5664-4f89-8ae5-1d1fb59f6983"

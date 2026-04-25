@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Target } from "lucide-react";
 import type { Skill, TimerMode } from "@/lib/types";
 import { formatElapsed, formatTotalHours } from "@/lib/time";
-import { CATEGORIES, getCurrentMilestone } from "@/lib/types";
+import { getCurrentMilestone } from "@/lib/types";
 
 interface HeroTimerProps {
   skills: Skill[];
@@ -18,8 +18,7 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
     return () => clearInterval(id);
   }, []);
 
-  const active = skills.filter((s) => !s.completed);
-  const lockedSkill = active.find((s) => s.lockedInAt !== null) ?? null;
+  const lockedSkill = skills.find((s) => s.lockedInAt !== null) ?? null;
 
   if (mode === "lockin") {
     const isIdle = !lockedSkill;
@@ -37,8 +36,8 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
       <div
         className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
           isIdle
-            ? "bg-gradient-to-br from-amber-500/40 via-amber-500/25 to-amber-500/15"
-            : "bg-gradient-to-br from-amber-600/90 via-orange-600 to-rose-700"
+            ? "bg-gradient-to-br from-lockin/40 via-lockin/25 to-lockin/15"
+            : "bg-gradient-to-br from-lockin/90 via-lockin-mid to-lockin-end"
         }`}
       >
         <div
@@ -71,10 +70,10 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
               {lockedSkill?.title ?? ""}
             </p>
           )}
-          {isIdle && active.length > 0 && (
+          {isIdle && skills.length > 0 && (
             <p className="text-sm text-white/70 mt-2">tap the target to start practicing</p>
           )}
-          {showLockInTip && isIdle && active.length > 0 && (
+          {showLockInTip && isIdle && skills.length > 0 && (
             <div className="mt-4 flex justify-center">
               <div className="relative inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 text-xs font-medium text-white/90 shadow-sm">
                 <Target className="size-3.5" />
@@ -87,15 +86,15 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
     );
   }
 
-  const totalMs = active.reduce((sum, s) => sum + s.timeSpentMs + (s.lockedInAt ? Date.now() - s.lockedInAt : 0), 0);
+  const totalMs = skills.reduce((sum, s) => sum + s.timeSpentMs + (s.lockedInAt ? Date.now() - s.lockedInAt : 0), 0);
   const totalHours = formatTotalHours(totalMs);
 
   return (
     <div
       className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
-        active.length === 0
-          ? "bg-gradient-to-br from-green-900/40 via-emerald-800/30 to-green-900/20 dark:from-green-950/50 dark:via-emerald-900/30 dark:to-green-950/20"
-          : "bg-gradient-to-br from-amber-500/90 via-orange-600 to-rose-700 dark:from-amber-700/90 dark:via-orange-800 dark:to-rose-900"
+        skills.length === 0
+          ? "bg-gradient-to-br from-green-400/60 via-emerald-500/40 to-green-400/30 dark:from-green-700/50 dark:via-emerald-600/30 dark:to-green-700/20"
+          : "bg-gradient-to-br from-purple-400/70 via-indigo-400/60 to-blue-400/50 dark:from-purple-600/60 dark:via-indigo-600/50 dark:to-blue-600/40"
       }`}
     >
       <div
@@ -119,9 +118,9 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
         </p>
 
         <p className="font-[family-name:var(--font-display)] text-lg md:text-xl font-medium tracking-tight text-white/90">
-          {active.length === 0
+          {skills.length === 0
             ? "add your first skill"
-            : `${active.length} skill${active.length > 1 ? "s" : ""} in progress`}
+            : `${skills.length} skill${skills.length > 1 ? "s" : ""}`}
         </p>
         <p className="text-xs text-white/60 mt-1">
           toward 10,000 hours of mastery
