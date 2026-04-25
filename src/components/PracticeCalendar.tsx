@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { Flame } from "lucide-react";
 import { fetchPracticeLog, getStreakFrom, buildCalendarDays } from "@/lib/practice-log";
 import type { LogEntry } from "@/lib/practice-log";
@@ -7,6 +7,7 @@ export function PracticeCalendar() {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [focusedIdx, setFocusedIdx] = useState(-1);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchPracticeLog().then((data) => {
@@ -14,6 +15,12 @@ export function PracticeCalendar() {
       setLoading(false);
     });
   }, []);
+
+  useEffect(() => {
+    if (!loading && scrollRef.current) {
+      scrollRef.current.scrollLeft = scrollRef.current.scrollWidth;
+    }
+  }, [loading]);
 
   const days = buildCalendarDays(entries);
   const { current, longest } = getStreakFrom(entries);
@@ -76,7 +83,7 @@ export function PracticeCalendar() {
         </div>
       </div>
 
-      <div className="flex gap-0.5 overflow-x-auto pb-1" role="grid" aria-label="Practice calendar">
+      <div ref={scrollRef} className="flex gap-0.5 overflow-x-auto pb-1" role="grid" aria-label="Practice calendar">
         <div className="flex flex-col gap-0.5 pr-1 pt-0" role="rowgroup">
           {DAY_LABELS.map((label, i) => (
             <div key={i} className="h-[10px] text-[0.45rem] text-muted-foreground leading-[10px]" role="columnheader">
