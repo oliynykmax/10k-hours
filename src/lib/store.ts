@@ -4,7 +4,7 @@ const STORE_KEY = "10k_skills";
 const THEME_KEY = "10k_theme";
 const MODE_KEY = "10k_mode";
 const FONT_STYLE_KEY = "10k_font_style";
-const LOCKIN_TIP_KEY = "10k_tip_seen";
+const PRACTICE_TIP_KEY = "10k_tip_seen";
 
 export function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
@@ -52,12 +52,12 @@ export function saveTheme(theme: "light" | "dark"): void {
   localStorage.setItem(THEME_KEY, theme);
 }
 
-export function loadMode(): "countdown" | "lockin" {
+export function loadMode(): "overview" | "practice" {
   const saved = localStorage.getItem(MODE_KEY);
-  return saved === "lockin" ? "lockin" : "countdown";
+  return saved === "practice" ? "practice" : "overview";
 }
 
-export function saveMode(mode: "countdown" | "lockin"): void {
+export function saveMode(mode: "overview" | "practice"): void {
   localStorage.setItem(MODE_KEY, mode);
 }
 
@@ -70,14 +70,14 @@ export function saveFontStyle(style: "default" | "mono"): void {
   localStorage.setItem(FONT_STYLE_KEY, style);
 }
 
-function getLockInTipKey(userId: string | null): string {
-  return userId ? `${LOCKIN_TIP_KEY}:${userId}` : LOCKIN_TIP_KEY;
+function getPracticeTipKey(userId: string | null): string {
+  return userId ? `${PRACTICE_TIP_KEY}:${userId}` : PRACTICE_TIP_KEY;
 }
 
-export function loadLockInTipSeen(userId: string | null): boolean {
-  return localStorage.getItem(getLockInTipKey(userId)) === "1";
+export function loadPracticeTipSeen(userId: string | null): boolean {
+  return localStorage.getItem(getPracticeTipKey(userId)) === "1";
 }
 
-export function saveLockInTipSeen(userId: string | null): void {
-  localStorage.setItem(getLockInTipKey(userId), "1");
+export function savePracticeTipSeen(userId: string | null): void {
+  localStorage.setItem(getPracticeTipKey(userId), "1");
 }

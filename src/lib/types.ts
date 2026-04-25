@@ -58,4 +58,4 @@ export function levelForXp(xp: number): { level: number; currentXp: number; next
   return { level, currentXp, nextXp };
 }
 
-export type TimerMode = "countdown" | "lockin";
+export type TimerMode = "overview" | "practice";

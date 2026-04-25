@@ -21,7 +21,10 @@ export function StatsBar({ skills }: StatsBarProps) {
     return sum + s.timeSpentMs + lockedExtra;
   }, 0);
   const totalHours = formatTotalHours(totalMs);
-  const xp = skills.reduce((sum, s) => sum + xpForHours(s.timeSpentMs), 0);
+  const xp = skills.reduce((sum, s) => {
+    const lockedExtra = s.lockedInAt ? Date.now() - s.lockedInAt : 0;
+    return sum + xpForHours(s.timeSpentMs + lockedExtra);
+  }, 0);
   const { level } = levelForXp(xp);
   const milestone = getCurrentMilestone(parseFloat(totalHours));
   const next = getNextMilestone(parseFloat(totalHours));

@@ -7,10 +7,10 @@ import { getCurrentMilestone } from "@/lib/types";
 interface HeroTimerProps {
   skills: Skill[];
   mode: TimerMode;
-  showLockInTip?: boolean;
+  showPracticeTip?: boolean;
 }
 
-export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProps) {
+export function HeroTimer({ skills, mode, showPracticeTip = false }: HeroTimerProps) {
   const [, setTick] = useState(0);
 
   useEffect(() => {
@@ -20,7 +20,7 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
 
   const lockedSkill = skills.find((s) => s.lockedInAt !== null) ?? null;
 
-  if (mode === "lockin") {
+  if (mode === "practice") {
     const isIdle = !lockedSkill;
     const totalMs = lockedSkill?.lockedInAt
       ? lockedSkill.timeSpentMs + (Date.now() - lockedSkill.lockedInAt)
@@ -35,34 +35,22 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
     return (
       <div
         className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
-          isIdle
-            ? "bg-gradient-to-br from-lockin/40 via-lockin/25 to-lockin/15"
-            : "bg-gradient-to-br from-lockin/90 via-lockin-mid to-lockin-end"
+          isIdle ? "bg-card border border-border" : "bg-peach"
         }`}
       >
-        <div
-          className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
-          style={{
-            backgroundImage:
-              "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
-            backgroundSize: "150px 150px",
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_35%_25%,rgba(255,255,255,0.08),transparent_55%)] pointer-events-none" />
-
         <div className="relative z-10 text-center">
           {!isIdle && milestone && (
-            <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-0.5 rounded-full bg-white/10 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/60 font-[family-name:var(--font-display)]">
+            <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-0.5 rounded-full bg-white/15 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/80 font-[family-name:var(--font-display)]">
               <Target className="size-3" />
               {milestone.label} — {totalHours}h
             </div>
           )}
 
           <div className="flex items-start justify-center gap-6 md:gap-10 mb-4">
-            <DigitGroup value={elapsed.days} label="days" pulse={false} />
-            <DigitGroup value={elapsed.hours} label="hrs" pulse={false} />
-            <DigitGroup value={elapsed.mins} label="min" pulse={false} />
-            <DigitGroup value={elapsed.secs} label="sec" pulse={false} />
+            <DigitGroup value={elapsed.days} label="days" pulse={false} idle={isIdle} />
+            <DigitGroup value={elapsed.hours} label="hrs" pulse={false} idle={isIdle} />
+            <DigitGroup value={elapsed.mins} label="min" pulse={false} idle={isIdle} />
+            <DigitGroup value={elapsed.secs} label="sec" pulse={false} idle={isIdle} />
           </div>
 
           {!isIdle && (
@@ -71,11 +59,11 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
             </p>
           )}
           {isIdle && skills.length > 0 && (
-            <p className="text-sm text-white/70 mt-2">tap the target to start practicing</p>
+            <p className="text-sm text-muted-foreground mt-2">tap the target to start practicing</p>
           )}
-          {showLockInTip && isIdle && skills.length > 0 && (
+          {showPracticeTip && isIdle && skills.length > 0 && (
             <div className="mt-4 flex justify-center">
-              <div className="relative inline-flex items-center gap-2 rounded-full border border-white/25 bg-white/12 px-3 py-1.5 text-xs font-medium text-white/90 shadow-sm">
+              <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-foreground shadow-sm">
                 <Target className="size-3.5" />
                 tap the target button on a skill
               </div>
@@ -88,59 +76,55 @@ export function HeroTimer({ skills, mode, showLockInTip = false }: HeroTimerProp
 
   const totalMs = skills.reduce((sum, s) => sum + s.timeSpentMs + (s.lockedInAt ? Date.now() - s.lockedInAt : 0), 0);
   const totalHours = formatTotalHours(totalMs);
+  const milestone = totalMs > 0 ? getCurrentMilestone(parseFloat(totalHours)) : null;
 
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl px-8 py-12 md:px-14 md:py-16 ${
-        skills.length === 0
-          ? "bg-gradient-to-br from-green-400/60 via-emerald-500/40 to-green-400/30 dark:from-green-700/50 dark:via-emerald-600/30 dark:to-green-700/20"
-          : "bg-gradient-to-br from-purple-400/70 via-indigo-400/60 to-blue-400/50 dark:from-purple-600/60 dark:via-indigo-600/50 dark:to-blue-600/40"
-      }`}
-    >
-      <div
-        className="absolute inset-0 opacity-[0.05] mix-blend-overlay pointer-events-none"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")",
-          backgroundSize: "150px 150px",
-        }}
-      />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_65%_25%,rgba(255,255,255,0.1),transparent_55%)] pointer-events-none" />
-
-      <div className="relative z-10 text-center">
-        <div className="inline-flex items-center gap-1.5 mb-3 px-3 py-0.5 rounded-full bg-white/10 text-[0.6rem] font-bold tracking-[0.16em] uppercase text-white/60 font-[family-name:var(--font-display)]">
+    <div className="relative overflow-hidden rounded-2xl border border-border bg-card px-8 py-10 md:px-12 md:py-12">
+      <div className="relative z-10 text-left">
+        <p className="font-[family-name:var(--font-display)] text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">
           total practice
+        </p>
+
+        <div className="flex items-baseline gap-2 mb-1">
+          <span className="font-[family-name:var(--font-display)] text-[2.8rem] md:text-[4rem] font-bold leading-none text-foreground tabular-nums">
+            {totalHours}
+          </span>
+          <span className="text-xl md:text-2xl text-muted-foreground/60 font-[family-name:var(--font-display)] font-semibold">
+            hours
+          </span>
         </div>
 
-        <p className="font-[family-name:var(--font-display)] text-[3rem] md:text-[5rem] font-bold leading-none text-white tabular-nums mb-2">
-          {totalHours}
-          <span className="text-3xl md:text-4xl text-white/60">h</span>
-        </p>
-
-        <p className="font-[family-name:var(--font-display)] text-lg md:text-xl font-medium tracking-tight text-white/90">
-          {skills.length === 0
-            ? "add your first skill"
-            : `${skills.length} skill${skills.length > 1 ? "s" : ""}`}
-        </p>
-        <p className="text-xs text-white/60 mt-1">
-          toward 10,000 hours of mastery
-        </p>
+        {milestone && (
+          <p className="text-sm text-muted-foreground">
+            {milestone.label} tier &middot; {skills.length} skill{skills.length !== 1 ? "s" : ""}
+          </p>
+        )}
+        {skills.length === 0 && (
+          <p className="text-sm text-muted-foreground">add a skill to start tracking</p>
+        )}
       </div>
+
+      {/* Peach accent bar at bottom */}
+      {totalMs > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-peach via-peach-mid to-peach-end" />
+      )}
     </div>
   );
 }
 
-function DigitGroup({ value, label, pulse }: { value: string; label: string; pulse: boolean }) {
+function DigitGroup({ value, label, pulse, idle }: { value: string; label: string; pulse: boolean; idle: boolean }) {
   return (
     <div className="flex flex-col items-center w-[56px] md:w-[80px]">
       <span
-        className={`font-[family-name:var(--font-display)] text-[2.2rem] md:text-[4.5rem] font-bold leading-none text-white tabular-nums ${
-          pulse ? "animate-pulse-urgent" : ""
-        }`}
+        className={`font-[family-name:var(--font-display)] text-[2.2rem] md:text-[4.5rem] font-bold leading-none tabular-nums transition-colors ${
+          idle ? "text-foreground" : "text-white"
+        } ${pulse ? "animate-pulse-urgent" : ""}`}
       >
         {value}
       </span>
-      <span className="font-[family-name:var(--font-body)] text-[0.6rem] font-medium uppercase tracking-[0.14em] text-white/60 mt-1.5">
+      <span className={`font-[family-name:var(--font-body)] text-[0.6rem] font-medium uppercase tracking-[0.14em] mt-1.5 transition-colors ${
+        idle ? "text-muted-foreground" : "text-white/60"
+      }`}>
         {label}
       </span>
     </div>

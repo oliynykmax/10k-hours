@@ -14,7 +14,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
   const totalHours = parseFloat(formatTotalHours(totalMs));
   const milestones = getMilestonesFor(totalHours);
 
-  const maxHours = MILESTONES[MILESTONES.length - 1]!.hours;
+  const maxHours = MILESTONES[MILESTONES.length - 1]?.hours ?? 10000;
   const progressPct = Math.min((totalHours / maxHours) * 100, 100);
 
   return (
@@ -26,7 +26,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
 
       <div className="relative h-2 bg-secondary rounded-full overflow-hidden">
         <div
-          className="h-full bg-gradient-to-r from-lockin via-lockin-mid to-lockin-end rounded-full transition-all duration-1000"
+          className="h-full bg-gradient-to-r from-peach via-peach-mid to-peach-end rounded-full transition-all duration-1000"
           style={{ width: `${progressPct}%` }}
         />
       </div>
@@ -37,7 +37,7 @@ export function MilestoneBar({ skills }: MilestoneBarProps) {
             key={def.hours}
             className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[0.55rem] font-bold uppercase tracking-wider transition-all ${
               earned
-                ? "bg-lockin/20 text-lockin dark:text-lockin border border-lockin/30"
+                ? "bg-peach/20 text-peach dark:text-peach border border-peach/30"
                 : "bg-secondary text-muted-foreground/50 border border-transparent"
             }`}
           >

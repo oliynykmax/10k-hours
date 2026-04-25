@@ -12,7 +12,7 @@ import { useSkills } from "@/hooks/useSkills";
 import { useTheme } from "@/hooks/useTheme";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/lib/auth-client";
-import { loadLockInTipSeen, saveLockInTipSeen } from "@/lib/store";
+import { loadPracticeTipSeen, savePracticeTipSeen } from "@/lib/store";
 import type { TimerMode } from "@/lib/types";
 
 export default function App() {
@@ -28,36 +28,36 @@ export default function App() {
     addSubtask,
     toggleSubtask,
     deleteSubtask,
-    lockIn,
-    lockOut,
+    startPractice,
+    stopPractice,
   } = useSkills();
 
   const { theme, toggleTheme, mode, setTimerMode: _setTimerMode, fontStyle, toggleFontStyle } = useTheme();
-  const [showLockInTip, setShowLockInTip] = useState(false);
+  const [showPracticeTip, setShowPracticeTip] = useState(false);
 
   useEffect(() => {
-    setShowLockInTip(!loadLockInTipSeen(userId));
+    setShowPracticeTip(!loadPracticeTipSeen(userId));
   }, [userId]);
 
   const setTimerMode = useCallback((m: TimerMode) => {
-    if (m === "countdown") {
+    if (m === "overview") {
       const locked = skills.find((t) => t.lockedInAt);
-      if (locked) lockOut(locked.id);
+      if (locked) stopPractice(locked.id);
     }
     _setTimerMode(m);
-  }, [skills, lockOut, _setTimerMode]);
+  }, [skills, stopPractice, _setTimerMode]);
 
-  const handleLockIn = useCallback((id: string) => {
-    lockIn(id);
-    _setTimerMode("lockin");
-    if (showLockInTip) {
-      saveLockInTipSeen(userId);
-      setShowLockInTip(false);
+  const handleStartPractice = useCallback((id: string) => {
+    startPractice(id);
+    _setTimerMode("practice");
+    if (showPracticeTip) {
+      savePracticeTipSeen(userId);
+      setShowPracticeTip(false);
     }
-  }, [lockIn, _setTimerMode, showLockInTip, userId]);
+  }, [startPractice, _setTimerMode, showPracticeTip, userId]);
 
-  const handleLockOut = useCallback((_id: string) => {
-    setTimerMode("countdown");
+  const handleStopPractice = useCallback((_id: string) => {
+    setTimerMode("overview");
   }, [setTimerMode]);
 
   const hasSkills = skills.length > 0;
@@ -65,39 +65,39 @@ export default function App() {
   return (
     <div className="max-w-[1080px] mx-auto px-4 md:px-8 h-dvh flex flex-col overflow-hidden">
       <header className="py-4 md:py-5 shrink-0">
-        <div className="rounded-2xl border border-border/70 bg-card/85 px-3 py-2 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-card/70 md:px-4">
+        <div className="rounded-2xl border border-border/70 bg-card/85 px-3 py-2 shadow-sm md:px-4">
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             <div className="mr-auto min-w-0">
               <h1 className="font-[family-name:var(--font-display)] text-2xl font-bold tracking-tight text-foreground md:text-[1.9rem]">
-                10k<span className="text-lockin">h</span>
+                10k<span className="text-peach">h</span>
               </h1>
             </div>
 
             <div className="order-3 w-full sm:order-none sm:w-auto">
               <div className="grid grid-cols-2 items-center rounded-xl border border-border/70 bg-background/70 p-1">
                 <button
-                  onClick={() => setTimerMode("countdown")}
+                  onClick={() => setTimerMode("overview")}
                   className={cn(
                     "flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
-                    mode === "countdown"
+                    mode === "overview"
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
-                  aria-pressed={mode === "countdown"}
+                  aria-pressed={mode === "overview"}
                   aria-label="Overview mode"
                 >
                   <Timer className="size-3" />
                   overview
                 </button>
                 <button
-                  onClick={() => setTimerMode("lockin")}
+                  onClick={() => setTimerMode("practice")}
                   className={cn(
                     "flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
-                    mode === "lockin"
-                      ? "bg-lockin text-lockin-foreground shadow-sm"
+                    mode === "practice"
+                      ? "bg-peach text-peach-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   )}
-                  aria-pressed={mode === "lockin"}
+                  aria-pressed={mode === "practice"}
                   aria-label="Practice mode"
                 >
                   <svg className="size-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -143,8 +143,8 @@ export default function App() {
 
       <main className="grid grid-cols-1 md:grid-cols-[5fr_4fr] grid-rows-[auto_1fr] md:grid-rows-1 gap-5 md:gap-10 flex-1 min-h-0 overflow-hidden">
         <section className="shrink-0 flex flex-col gap-4 min-h-0 overflow-y-auto pr-1">
-          <HeroTimer skills={skills} mode={mode} showLockInTip={showLockInTip} />
-          {mode === "countdown" && (
+          <HeroTimer skills={skills} mode={mode} showPracticeTip={showPracticeTip} />
+          {mode === "overview" && (
             <>
               <StatsBar skills={skills} />
               <MilestoneBar skills={skills} />
@@ -171,8 +171,8 @@ export default function App() {
                 onAddSubtask={addSubtask}
                 onToggleSubtask={toggleSubtask}
                 onDeleteSubtask={deleteSubtask}
-                onLockIn={handleLockIn}
-                onLockOut={handleLockOut}
+                onStartPractice={handleStartPractice}
+                onStopPractice={handleStopPractice}
               />
             ))}
 

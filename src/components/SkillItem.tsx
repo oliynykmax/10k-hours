@@ -19,8 +19,8 @@ interface SkillItemProps {
   onAddSubtask: (skillId: string, text: string) => void;
   onToggleSubtask: (skillId: string, subIndex: number) => void;
   onDeleteSubtask: (skillId: string, subIndex: number) => void;
-  onLockIn: (id: string) => void;
-  onLockOut: (id: string) => void;
+  onStartPractice: (id: string) => void;
+  onStopPractice: (id: string) => void;
 }
 
 export function SkillItem({
@@ -33,8 +33,8 @@ export function SkillItem({
   onAddSubtask,
   onToggleSubtask,
   onDeleteSubtask,
-  onLockIn,
-  onLockOut,
+  onStartPractice,
+  onStopPractice,
 }: SkillItemProps) {
   const [, setTick] = useState(0);
   const [editing, setEditing] = useState(false);
@@ -84,12 +84,14 @@ export function SkillItem({
     setEditing(false);
   };
 
+  const isPracticing = !!skill.lockedInAt;
+
   return (
     <div
       className={cn(
         "group bg-card border border-border rounded-xl px-4 py-4 transition-all animate-task-enter",
         "hover:border-border/80 hover:shadow-md",
-        skill.lockedInAt && "border-lockin/60 bg-lockin/5 dark:bg-lockin/10"
+        isPracticing && "border-peach/60 bg-peach/5 dark:bg-peach/10"
       )}
     >
       {editing ? (
@@ -117,7 +119,6 @@ export function SkillItem({
         </div>
       ) : (
         <div className="flex items-start gap-3">
-
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-[family-name:var(--font-display)] text-base font-semibold tracking-tight">
@@ -126,9 +127,9 @@ export function SkillItem({
               <Badge variant="secondary" className="text-[0.55rem] font-bold uppercase tracking-wider">
                 {milestone.label}
               </Badge>
-              {skill.lockedInAt && (
-                <span className="inline-flex items-center gap-1 text-[0.6rem] font-bold tracking-[0.12em] uppercase text-lockin font-[family-name:var(--font-display)]">
-                  <span className="size-1.5 rounded-full bg-lockin animate-pulse" />
+              {isPracticing && (
+                <span className="inline-flex items-center gap-1 text-[0.6rem] font-bold tracking-[0.12em] uppercase text-peach font-[family-name:var(--font-display)]">
+                  <span className="size-1.5 rounded-full bg-peach animate-pulse" />
                   practicing
                 </span>
               )}
@@ -140,7 +141,7 @@ export function SkillItem({
             <div className="flex items-center gap-2 mt-1">
               <div className="flex-1 h-1.5 bg-secondary rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-gradient-to-r from-lockin via-lockin-mid to-lockin-end rounded-full transition-all duration-1000"
+                  className="h-full bg-gradient-to-r from-peach via-peach-mid to-peach-end rounded-full transition-all duration-1000"
                   style={{ width: `${Math.min((totalHours / 10000) * 100, 100)}%` }}
                 />
               </div>
@@ -169,35 +170,37 @@ export function SkillItem({
               </div>
             )}
 
-            {true && (
-              <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/60">
-                <Input
-                  value={subtaskInput}
-                  onChange={(e) => setSubtaskInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") { e.preventDefault(); handleAddSubtask(); }
-                  }}
-                  placeholder="add sub-goal…"
-                  aria-label="Add sub-goal"
-                  className="h-7 text-sm bg-secondary/30 border-border/50"
-                />
-                <Button variant="outline" size="xs" onClick={handleAddSubtask} className="rounded-full text-primary border-primary/30 shrink-0">
-                  <Plus className="size-3" />
-                </Button>
-              </div>
-            )}
+            <div className="flex items-center gap-2 mt-2 pt-2 border-t border-border/60">
+              <Input
+                value={subtaskInput}
+                onChange={(e) => setSubtaskInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") { e.preventDefault(); handleAddSubtask(); }
+                }}
+                placeholder="add sub-goal…"
+                aria-label="Add sub-goal"
+                className="h-7 text-sm bg-secondary/30 border-border/50"
+              />
+              <Button variant="outline" size="xs" onClick={handleAddSubtask} className="rounded-full text-primary border-primary/30 shrink-0">
+                <Plus className="size-3" />
+              </Button>
+            </div>
           </div>
 
           <div className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
-            {skill.lockedInAt ? (
-              <Button variant="ghost" size="icon-sm" onClick={() => onLockOut(skill.id)} className="text-lockin hover:text-lockin/80 hover:bg-lockin/10" aria-label="Stop practicing" aria-pressed="true">
-                <Square className="size-4" />
-              </Button>
-            ) : (
-              <Button variant="ghost" size="icon-sm" onClick={() => onLockIn(skill.id)} className="text-muted-foreground hover:text-lockin hover:bg-lockin/10" aria-label="Start practicing" aria-pressed="false">
-                <Target className="size-4" />
-              </Button>
-            )}
+            <button
+              onClick={() => isPracticing ? onStopPractice(skill.id) : onStartPractice(skill.id)}
+              className={cn(
+                "flex items-center justify-center w-8 h-8 rounded-lg transition-all",
+                isPracticing
+                  ? "text-peach hover:text-peach/80 hover:bg-peach/10"
+                  : "text-muted-foreground hover:text-peach hover:bg-peach/10"
+              )}
+              aria-label={isPracticing ? "Stop practicing" : "Start practicing"}
+              aria-pressed={isPracticing}
+            >
+              {isPracticing ? <Square className="size-4" /> : <Target className="size-4" />}
+            </button>
             <Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit skill">
               <Pencil className="size-4" />
             </Button>

@@ -31,7 +31,7 @@ export function AddSkillForm({ onAdd }: AddSkillFormProps) {
     return (
       <Button
         variant="outline"
-        className="w-full h-12 border-dashed border-2 border-lockin/40 text-lockin font-[family-name:var(--font-display)] font-medium gap-2.5 bg-lockin/5 hover:bg-lockin/15 hover:border-lockin hover:-translate-y-px transition-all"
+        className="w-full h-12 border-dashed border-2 border-peach/40 text-peach font-[family-name:var(--font-display)] font-medium gap-2.5 bg-peach/5 hover:bg-peach/15 hover:border-peach hover:-translate-y-px transition-all"
         onClick={() => setShowForm(true)}
       >
         <Plus className="size-4" />
@@ -52,7 +52,7 @@ export function AddSkillForm({ onAdd }: AddSkillFormProps) {
       />
 
       <div className="flex gap-2 justify-end pt-1">
-        <Button type="submit" className="rounded-full font-[family-name:var(--font-display)] font-semibold shadow-md shadow-lockin/20 bg-lockin hover:bg-lockin-mid text-lockin-foreground">
+        <Button type="submit" className="rounded-full font-[family-name:var(--font-display)] font-semibold shadow-md shadow-peach/20 bg-peach hover:bg-peach-mid text-peach-foreground">
           add skill
         </Button>
         <Button type="button" variant="ghost" onClick={handleCancel} className="rounded-full">

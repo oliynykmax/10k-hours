@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Flame } from "lucide-react";
 import { fetchPracticeLog, getStreakFrom, buildCalendarDays } from "@/lib/practice-log";
 import type { LogEntry } from "@/lib/practice-log";
@@ -6,6 +6,7 @@ import type { LogEntry } from "@/lib/practice-log";
 export function PracticeCalendar() {
   const [entries, setEntries] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [focusedIdx, setFocusedIdx] = useState(-1);
 
   useEffect(() => {
     fetchPracticeLog().then((data) => {
@@ -23,13 +24,32 @@ export function PracticeCalendar() {
     weeks.push(days.slice(w * 7, (w + 1) * 7));
   }
 
+  const flatIndex = (wi: number, di: number) => wi * 7 + di;
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent, wi: number, di: number) => {
+    let newIdx = flatIndex(wi, di);
+    switch (e.key) {
+      case "ArrowLeft": newIdx--; break;
+      case "ArrowRight": newIdx++; break;
+      case "ArrowUp": newIdx -= 7; break;
+      case "ArrowDown": newIdx += 7; break;
+      default: return;
+    }
+    e.preventDefault();
+    if (newIdx >= 0 && newIdx < days.length) {
+      setFocusedIdx(newIdx);
+      const cell = document.querySelector(`[data-cell="${newIdx}"]`) as HTMLElement;
+      cell?.focus();
+    }
+  }, [days.length]);
+
   const intensity = (minutes: number): string => {
     if (minutes === 0) return "bg-secondary/40";
     const ratio = minutes / maxMinutes;
-    if (ratio < 0.25) return "bg-lockin/20";
-    if (ratio < 0.5) return "bg-lockin/40";
-    if (ratio < 0.75) return "bg-lockin/60";
-    return "bg-lockin";
+    if (ratio < 0.25) return "bg-peach/20";
+    if (ratio < 0.5) return "bg-peach/40";
+    if (ratio < 0.75) return "bg-peach/60";
+    return "bg-peach";
   };
 
   const DAY_LABELS = ["Mon", "", "Wed", "", "Fri", "", ""];
@@ -57,23 +77,32 @@ export function PracticeCalendar() {
         </div>
       </div>
 
-      <div className="flex gap-0.5 overflow-x-auto pb-1">
-        <div className="flex flex-col gap-0.5 pr-1 pt-0">
+      <div className="flex gap-0.5 overflow-x-auto pb-1" role="grid" aria-label="Practice calendar">
+        <div className="flex flex-col gap-0.5 pr-1 pt-0" role="rowgroup">
           {DAY_LABELS.map((label, i) => (
-            <div key={i} className="h-[10px] text-[0.45rem] text-muted-foreground leading-[10px]">
+            <div key={i} className="h-[10px] text-[0.45rem] text-muted-foreground leading-[10px]" role="columnheader">
               {label}
             </div>
           ))}
         </div>
         {weeks.map((week, wi) => (
-          <div key={wi} className="flex flex-col gap-0.5">
-            {week.map((day) => (
-              <div
-                key={day.date}
-                className={`w-[10px] h-[10px] rounded-[2px] ${intensity(day.minutes)}`}
-                title={`${day.date}: ${day.minutes}m`}
-              />
-            ))}
+          <div key={wi} className="flex flex-col gap-0.5" role="row">
+            {week.map((day, di) => {
+              const fi = flatIndex(wi, di);
+              return (
+                <button
+                  key={day.date}
+                  data-cell={fi}
+                  className={`w-[10px] h-[10px] rounded-[2px] ${intensity(day.minutes)} focus:outline-none focus:ring-1 focus:ring-ring focus:ring-offset-1`}
+                  onClick={() => setFocusedIdx(fi)}
+                  onKeyDown={(e) => handleKeyDown(e, wi, di)}
+                  onFocus={() => setFocusedIdx(fi)}
+                  aria-label={`${day.date}: ${day.minutes} minute${day.minutes !== 1 ? "s" : ""}`}
+                  tabIndex={fi === focusedIdx ? 0 : -1}
+                  role="gridcell"
+                />
+              );
+            })}
           </div>
         ))}
       </div>
@@ -81,10 +110,10 @@ export function PracticeCalendar() {
       <div className="flex items-center gap-1.5 text-[0.5rem] text-muted-foreground justify-end">
         <span>Less</span>
         <div className="w-[10px] h-[10px] rounded-[2px] bg-secondary/40" />
-        <div className="w-[10px] h-[10px] rounded-[2px] bg-lockin/20" />
-        <div className="w-[10px] h-[10px] rounded-[2px] bg-lockin/40" />
-        <div className="w-[10px] h-[10px] rounded-[2px] bg-lockin/60" />
-        <div className="w-[10px] h-[10px] rounded-[2px] bg-lockin" />
+        <div className="w-[10px] h-[10px] rounded-[2px] bg-peach/20" />
+        <div className="w-[10px] h-[10px] rounded-[2px] bg-peach/40" />
+        <div className="w-[10px] h-[10px] rounded-[2px] bg-peach/60" />
+        <div className="w-[10px] h-[10px] rounded-[2px] bg-peach" />
         <span>More</span>
       </div>
     </div>

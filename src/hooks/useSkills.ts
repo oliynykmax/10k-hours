@@ -191,7 +191,7 @@ export function useSkills() {
     );
   }, []);
 
-  const lockIn = useCallback((id: string) => {
+  const startPractice = useCallback((id: string) => {
     const t = now();
     setSkills((prev) =>
       prev.map((skill) => {
@@ -202,7 +202,7 @@ export function useSkills() {
     );
   }, []);
 
-  const lockOut = useCallback((id: string) => {
+  const stopPractice = useCallback((id: string) => {
     const t = now();
     setSkills((prev) =>
       prev.map((skill) => {
@@ -225,7 +225,7 @@ export function useSkills() {
     addSubtask,
     toggleSubtask,
     deleteSubtask,
-    lockIn,
-    lockOut,
+    startPractice,
+    stopPractice,
   };
 }
