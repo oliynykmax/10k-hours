@@ -79,7 +79,19 @@ export const onRequestPut: PagesFunction = async (context) => {
   }
 
   const body = await context.request.json() as {
-    tasks: Array<{
+    tasks?: Array<{
+      id: string;
+      title: string;
+      category?: string;
+      deadline: string | null;
+      completed: boolean;
+      subtasks: Array<{ text: string; done: boolean }>;
+      createdAt: number;
+      lockedInAt: number | null;
+      timeSpentMs: number;
+      updatedAt: number;
+    }>;
+    skills?: Array<{
       id: string;
       title: string;
       category?: string;
@@ -92,6 +104,13 @@ export const onRequestPut: PagesFunction = async (context) => {
       updatedAt: number;
     }>;
   };
+  const tasks = body.tasks ?? body.skills;
+  if (!Array.isArray(tasks)) {
+    return new Response(JSON.stringify({ error: "Expected body.tasks or body.skills array" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
 
   const db = createDB(context.env.DB as D1Database);
 
@@ -106,8 +125,8 @@ export const onRequestPut: PagesFunction = async (context) => {
   const toInsert: any[] = [];
   const toUpdate: any[] = [];
 
-  for (let i = 0; i < body.tasks.length; i++) {
-    const task = body.tasks[i]!;
+  for (let i = 0; i < tasks.length; i++) {
+    const task = tasks[i]!;
     const serverUpdatedAt = existingMap.get(task.id);
     const row = {
       id: task.id,
@@ -131,7 +150,7 @@ export const onRequestPut: PagesFunction = async (context) => {
     }
   }
 
-  const clientIds = new Set(body.tasks.map((t) => t.id));
+  const clientIds = new Set(tasks.map((t) => t.id));
   const toDelete = existing.filter((r) => !clientIds.has(r.id));
 
   for (const row of toInsert) {
