@@ -24,7 +24,6 @@ export function PracticeCalendar() {
 
   const days = buildCalendarDays(entries);
   const { current, longest } = getStreakFrom(entries);
-  const maxMinutes = Math.max(...days.map((d) => d.minutes), 1);
 
   const weeks: { date: string; minutes: number }[][] = [];
   for (let w = 0; w < 53; w++) {
@@ -33,22 +32,34 @@ export function PracticeCalendar() {
 
   const flatIndex = (wi: number, di: number) => wi * 7 + di;
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent, wi: number, di: number) => {
-    let newIdx = flatIndex(wi, di);
-    switch (e.key) {
-      case "ArrowLeft": newIdx--; break;
-      case "ArrowRight": newIdx++; break;
-      case "ArrowUp": newIdx -= 7; break;
-      case "ArrowDown": newIdx += 7; break;
-      default: return;
-    }
-    e.preventDefault();
-    if (newIdx >= 0 && newIdx < days.length) {
-      setFocusedIdx(newIdx);
-      const cell = document.querySelector(`[data-cell="${newIdx}"]`) as HTMLElement;
-      cell?.focus();
-    }
-  }, [days.length]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent, wi: number, di: number) => {
+      let newIdx = flatIndex(wi, di);
+      switch (e.key) {
+        case "ArrowLeft":
+          newIdx--;
+          break;
+        case "ArrowRight":
+          newIdx++;
+          break;
+        case "ArrowUp":
+          newIdx -= 7;
+          break;
+        case "ArrowDown":
+          newIdx += 7;
+          break;
+        default:
+          return;
+      }
+      e.preventDefault();
+      if (newIdx >= 0 && newIdx < days.length) {
+        setFocusedIdx(newIdx);
+        const cell = document.querySelector(`[data-cell="${newIdx}"]`) as HTMLElement;
+        cell?.focus();
+      }
+    },
+    [days.length],
+  );
 
   const intensity = (minutes: number): string => {
     if (minutes === 0) return "bg-secondary/40";
@@ -77,9 +88,7 @@ export function PracticeCalendar() {
           <Flame className="size-4 text-orange-500" />
           <span className="font-bold tabular-nums">{current}</span>
           <span className="text-xs text-muted-foreground">day{current !== 1 ? "s" : ""}</span>
-          {longest > current && (
-            <span className="text-[0.55rem] text-muted-foreground ml-1">best: {longest}</span>
-          )}
+          {longest > current && <span className="text-[0.55rem] text-muted-foreground ml-1">best: {longest}</span>}
         </div>
       </div>
 

@@ -1,28 +1,22 @@
+import type { Handler } from "../_lib/context";
 import { createAuth } from "../_lib/auth";
 import { createDB } from "../_lib/db";
 
-export const onRequestGet: PagesFunction = async (context) => {
-  const auth = createAuth(context.env as any);
+export const onRequestGet: Handler = async (context) => {
+  const auth = createAuth(context.env);
   const session = await auth.api.getSession({ headers: context.request.headers });
   if (!session?.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const db = createDB(context.env.DB as D1Database);
-  const rows = await db
-    .selectFrom("practice_log")
-    .selectAll()
-    .where("user_id", "=", session.user.id)
-    .execute();
+  const db = createDB(context.env.DB);
+  const rows = await db.selectFrom("practice_log").selectAll().where("user_id", "=", session.user.id).execute();
 
-  return new Response(
-    JSON.stringify(rows),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify(rows), { headers: { "Content-Type": "application/json" } });
 };
 
-export const onRequestPut: PagesFunction = async (context) => {
-  const auth = createAuth(context.env as any);
+export const onRequestPut: Handler = async (context) => {
+  const auth = createAuth(context.env);
   const session = await auth.api.getSession({ headers: context.request.headers });
   if (!session?.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
@@ -37,7 +31,7 @@ export const onRequestPut: PagesFunction = async (context) => {
     return new Response(JSON.stringify({ error: "Invalid body" }), { status: 400 });
   }
 
-  const db = createDB(context.env.DB as D1Database);
+  const db = createDB(context.env.DB);
   const now = Date.now();
   const id = `pl_${session.user.id}_${body.date}`;
 
@@ -54,7 +48,7 @@ export const onRequestPut: PagesFunction = async (context) => {
       oc.columns(["user_id", "date"]).doUpdateSet({
         minutes: body.minutes,
         updated_at: now,
-      })
+      }),
     )
     .execute();
 
