@@ -59,9 +59,7 @@ export function SkillItem({
     }
   }, [skill.title, editing]);
 
-  const totalMs = skill.lockedInAt
-    ? skill.timeSpentMs + (Date.now() - skill.lockedInAt)
-    : skill.timeSpentMs;
+  const totalMs = skill.lockedInAt ? skill.timeSpentMs + (Date.now() - skill.lockedInAt) : skill.timeSpentMs;
   const totalHours = parseFloat(formatTotalHours(totalMs));
   const milestone = getCurrentMilestone(totalHours);
 
@@ -91,7 +89,7 @@ export function SkillItem({
       className={cn(
         "group bg-card border border-border rounded-xl px-4 py-4 transition-all animate-task-enter",
         "hover:border-border/80 hover:shadow-md",
-        isPracticing && "border-peach/60 bg-peach/5 dark:bg-peach/10"
+        isPracticing && "border-peach/60 bg-peach/5 dark:bg-peach/10",
       )}
     >
       {editing ? (
@@ -101,7 +99,10 @@ export function SkillItem({
             value={editTitle}
             onChange={(e) => setEditTitle(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter") { e.preventDefault(); handleSaveEdit(); }
+              if (e.key === "Enter") {
+                e.preventDefault();
+                handleSaveEdit();
+              }
               if (e.key === "Escape") handleCancelEdit();
             }}
             aria-label="Skill name"
@@ -145,9 +146,7 @@ export function SkillItem({
                   style={{ width: `${Math.min((totalHours / 10000) * 100, 100)}%` }}
                 />
               </div>
-              <span className="text-[0.55rem] font-medium text-muted-foreground tabular-nums shrink-0">
-                /10k
-              </span>
+              <span className="text-[0.55rem] font-medium text-muted-foreground tabular-nums shrink-0">/10k</span>
             </div>
 
             {skill.subtasks.length > 0 && (
@@ -159,10 +158,20 @@ export function SkillItem({
                       onCheckedChange={() => onToggleSubtask(skill.id, si)}
                       className="size-4 rounded-full"
                     />
-                    <span className={cn("text-sm flex-1 min-w-0 transition-colors", st.done ? "line-through text-muted-foreground" : "text-foreground/80")}>
+                    <span
+                      className={cn(
+                        "text-sm flex-1 min-w-0 transition-colors",
+                        st.done ? "line-through text-muted-foreground" : "text-foreground/80",
+                      )}
+                    >
                       {st.text}
                     </span>
-                    <Button variant="ghost" size="icon-xs" className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground hover:text-overdue hover:bg-overdue-bg transition-all" onClick={() => onDeleteSubtask(skill.id, si)}>
+                    <Button
+                      variant="ghost"
+                      size="icon-xs"
+                      className="opacity-0 group-hover/sub:opacity-100 text-muted-foreground hover:text-overdue hover:bg-overdue-bg transition-all"
+                      onClick={() => onDeleteSubtask(skill.id, si)}
+                    >
                       <X className="size-3" />
                     </Button>
                   </div>
@@ -175,13 +184,21 @@ export function SkillItem({
                 value={subtaskInput}
                 onChange={(e) => setSubtaskInput(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") { e.preventDefault(); handleAddSubtask(); }
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddSubtask();
+                  }
                 }}
                 placeholder="add sub-goal…"
                 aria-label="Add sub-goal"
                 className="h-7 text-sm bg-secondary/30 border-border/50"
               />
-              <Button variant="outline" size="xs" onClick={handleAddSubtask} className="rounded-full text-primary border-primary/30 shrink-0">
+              <Button
+                variant="outline"
+                size="xs"
+                onClick={handleAddSubtask}
+                className="rounded-full text-primary border-primary/30 shrink-0"
+              >
                 <Plus className="size-3" />
               </Button>
             </div>
@@ -189,28 +206,54 @@ export function SkillItem({
 
           <div className="flex items-center gap-0.5 flex-shrink-0 mt-0.5">
             <button
-              onClick={() => isPracticing ? onStopPractice(skill.id) : onStartPractice(skill.id)}
+              onClick={() => (isPracticing ? onStopPractice(skill.id) : onStartPractice(skill.id))}
               className={cn(
                 "flex items-center justify-center w-8 h-8 rounded-lg transition-all",
                 isPracticing
                   ? "text-peach hover:text-peach/80 hover:bg-peach/10"
-                  : "text-muted-foreground hover:text-peach hover:bg-peach/10"
+                  : "text-muted-foreground hover:text-peach hover:bg-peach/10",
               )}
               aria-label={isPracticing ? "Stop practicing" : "Start practicing"}
               aria-pressed={isPracticing}
             >
               {isPracticing ? <Square className="size-4" /> : <Target className="size-4" />}
             </button>
-            <Button variant="ghost" size="icon-sm" onClick={() => setEditing(true)} className="text-muted-foreground hover:text-primary hover:bg-primary/10" aria-label="Edit skill">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setEditing(true)}
+              className="text-muted-foreground hover:text-primary hover:bg-primary/10"
+              aria-label="Edit skill"
+            >
               <Pencil className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon-sm" disabled={index === 0} onClick={() => onMove(skill.id, -1)} className="text-muted-foreground" aria-label="Move up">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              disabled={index === 0}
+              onClick={() => onMove(skill.id, -1)}
+              className="text-muted-foreground"
+              aria-label="Move up"
+            >
               <ChevronUp className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon-sm" disabled={index >= total - 1} onClick={() => onMove(skill.id, 1)} className="text-muted-foreground" aria-label="Move down">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              disabled={index >= total - 1}
+              onClick={() => onMove(skill.id, 1)}
+              className="text-muted-foreground"
+              aria-label="Move down"
+            >
               <ChevronDown className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon-sm" className="text-muted-foreground hover:text-overdue hover:bg-overdue-bg" onClick={() => onDelete(skill.id)} aria-label="Delete skill">
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="text-muted-foreground hover:text-overdue hover:bg-overdue-bg"
+              onClick={() => onDelete(skill.id)}
+              aria-label="Delete skill"
+            >
               <Trash2 className="size-4" />
             </Button>
           </div>

@@ -19,7 +19,7 @@ export function AddSkillForm({ onAdd }: AddSkillFormProps) {
       setTitle("");
       setShowForm(false);
     },
-    [title, onAdd]
+    [title, onAdd],
   );
 
   const handleCancel = useCallback(() => {
@@ -41,7 +41,10 @@ export function AddSkillForm({ onAdd }: AddSkillFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-card border border-border rounded-xl p-5 shadow-md animate-slide-down space-y-4">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-card border border-border rounded-xl p-5 shadow-md animate-slide-down space-y-4"
+    >
       <Input
         value={title}
         onChange={(e) => setTitle(e.target.value)}
@@ -52,7 +55,10 @@ export function AddSkillForm({ onAdd }: AddSkillFormProps) {
       />
 
       <div className="flex gap-2 justify-end pt-1">
-        <Button type="submit" className="rounded-full font-[family-name:var(--font-display)] font-semibold shadow-md shadow-peach/20 bg-peach hover:bg-peach-mid text-peach-foreground">
+        <Button
+          type="submit"
+          className="rounded-full font-[family-name:var(--font-display)] font-semibold shadow-md shadow-peach/20 bg-peach hover:bg-peach-mid text-peach-foreground"
+        >
           add skill
         </Button>
         <Button type="button" variant="ghost" onClick={handleCancel} className="rounded-full">

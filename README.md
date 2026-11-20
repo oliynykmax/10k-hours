@@ -18,7 +18,8 @@ Practice any skill — coding, music, art, sports, languages — and watch your 
 
 ```bash
 bun install
-bun run dev
+bun run dev    # builds with Bun, then runs wrangler dev
+bun fmt && bun lint && bun check
 ```
 
 ## deploy
@@ -27,8 +28,8 @@ bun run dev
 bun run deploy
 ```
 
-Cloudflare Pages + D1 via Wrangler.
+A Cloudflare Worker serves the SPA and the `/api` routes, with D1 for storage. See `ENVIRONMENT_SETUP.md` for secrets.
 
 ## stack
 
-React · Vite · Tailwind · Radix · Bun · Cloudflare D1 · Better Auth
+React · Tailwind · Radix · Bun · Cloudflare Workers · D1 · Better Auth

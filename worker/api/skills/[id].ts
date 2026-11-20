@@ -1,15 +1,16 @@
+import type { Handler } from "../../_lib/context";
 import { createAuth } from "../../_lib/auth";
-import { createDB, skillRowToClient } from "../../_lib/db";
+import { createDB, skillRowToClient, type SkillRow } from "../../_lib/db";
 
-export const onRequestPatch: PagesFunction = async (context) => {
-  const auth = createAuth(context.env as any);
+export const onRequestPatch: Handler = async (context) => {
+  const auth = createAuth(context.env);
   const session = await auth.api.getSession({ headers: context.request.headers });
   if (!session?.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const id = context.params.id as string;
-  const body = await context.request.json() as Partial<{
+  const id = context.params.id ?? "";
+  const body = (await context.request.json()) as Partial<{
     title: string;
     category: string;
     deadline: string | null;
@@ -20,9 +21,9 @@ export const onRequestPatch: PagesFunction = async (context) => {
     updatedAt: number;
   }>;
 
-  const db = createDB(context.env.DB as D1Database);
+  const db = createDB(context.env.DB);
 
-  const updates: Record<string, any> = { updated_at: body.updatedAt ?? Date.now() };
+  const updates: Partial<SkillRow> = { updated_at: body.updatedAt ?? Date.now() };
   if (body.title !== undefined) updates.title = body.title;
   if (body.category !== undefined) updates.category = body.category;
   if (body.deadline !== undefined) updates.deadline = body.deadline;
@@ -31,12 +32,7 @@ export const onRequestPatch: PagesFunction = async (context) => {
   if (body.lockedInAt !== undefined) updates.locked_in_at = body.lockedInAt;
   if (body.timeSpentMs !== undefined) updates.time_spent_ms = body.timeSpentMs;
 
-  await db
-    .updateTable("skill")
-    .set(updates)
-    .where("id", "=", id)
-    .where("user_id", "=", session.user.id)
-    .execute();
+  await db.updateTable("skill").set(updates).where("id", "=", id).where("user_id", "=", session.user.id).execute();
 
   const updated = await db
     .selectFrom("skill")
@@ -49,27 +45,22 @@ export const onRequestPatch: PagesFunction = async (context) => {
     return new Response(JSON.stringify({ error: "Not found" }), { status: 404 });
   }
 
-  return new Response(
-    JSON.stringify(skillRowToClient(updated[0]!)),
-    { headers: { "Content-Type": "application/json" } },
-  );
+  return new Response(JSON.stringify(skillRowToClient(updated[0]!)), {
+    headers: { "Content-Type": "application/json" },
+  });
 };
 
-export const onRequestDelete: PagesFunction = async (context) => {
-  const auth = createAuth(context.env as any);
+export const onRequestDelete: Handler = async (context) => {
+  const auth = createAuth(context.env);
   const session = await auth.api.getSession({ headers: context.request.headers });
   if (!session?.user) {
     return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
   }
 
-  const id = context.params.id as string;
-  const db = createDB(context.env.DB as D1Database);
+  const id = context.params.id ?? "";
+  const db = createDB(context.env.DB);
 
-  await db
-    .deleteFrom("skill")
-    .where("id", "=", id)
-    .where("user_id", "=", session.user.id)
-    .execute();
+  await db.deleteFrom("skill").where("id", "=", id).where("user_id", "=", session.user.id).execute();
 
   return new Response(JSON.stringify({ ok: true }), { status: 200 });
 };

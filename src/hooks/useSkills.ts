@@ -62,9 +62,7 @@ export function useSkills() {
           }
         }
 
-        const merged = Array.from(mergedMap.values()).sort(
-          (a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0)
-        );
+        const merged = Array.from(mergedMap.values()).sort((a, b) => (a.createdAt ?? 0) - (b.createdAt ?? 0));
 
         const reconciled: Skill[] = await apiFetch("/skills", {
           method: "PUT",
@@ -132,9 +130,7 @@ export function useSkills() {
   }, []);
 
   const editSkill = useCallback((id: string, updates: Partial<Pick<Skill, "title">>) => {
-    setSkills((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updates, updatedAt: now() } : s))
-    );
+    setSkills((prev) => prev.map((s) => (s.id === id ? { ...s, ...updates, updatedAt: now() } : s)));
   }, []);
 
   const deleteSkill = useCallback((id: string) => {
@@ -143,16 +139,13 @@ export function useSkills() {
 
   const moveSkill = useCallback((id: string, direction: number) => {
     setSkills((prev) => {
-      const active = prev.filter((s) => !s.completed);
-      const idx = active.findIndex((s) => s.id === id);
+      const idx = prev.findIndex((s) => s.id === id);
       if (idx < 0) return prev;
       const newIdx = idx + direction;
-      if (newIdx < 0 || newIdx >= active.length) return prev;
+      if (newIdx < 0 || newIdx >= prev.length) return prev;
 
-      const fullIdx = prev.findIndex((s) => s.id === active[idx]!.id);
-      const fullNewIdx = prev.findIndex((s) => s.id === active[newIdx]!.id);
       const next = [...prev];
-      [next[fullIdx], next[fullNewIdx]] = [next[fullNewIdx]!, next[fullIdx]!];
+      [next[idx], next[newIdx]] = [next[newIdx]!, next[idx]!];
       return next.map((s) => ({ ...s, updatedAt: now() }));
     });
   }, []);
@@ -162,8 +155,8 @@ export function useSkills() {
       prev.map((s) =>
         s.id === skillId
           ? { ...s, subtasks: [...s.subtasks, { text: text.trim(), done: false }], updatedAt: now() }
-          : s
-      )
+          : s,
+      ),
     );
   }, []);
 
@@ -173,21 +166,19 @@ export function useSkills() {
         s.id === skillId
           ? {
               ...s,
-              subtasks: s.subtasks.map((st, i) =>
-                i === subIndex ? { ...st, done: !st.done } : st
-              ),
+              subtasks: s.subtasks.map((st, i) => (i === subIndex ? { ...st, done: !st.done } : st)),
               updatedAt: now(),
             }
-          : s
-      )
+          : s,
+      ),
     );
   }, []);
 
   const deleteSubtask = useCallback((skillId: string, subIndex: number) => {
     setSkills((prev) =>
       prev.map((s) =>
-        s.id === skillId ? { ...s, subtasks: s.subtasks.filter((_, i) => i !== subIndex), updatedAt: now() } : s
-      )
+        s.id === skillId ? { ...s, subtasks: s.subtasks.filter((_, i) => i !== subIndex), updatedAt: now() } : s,
+      ),
     );
   }, []);
 
@@ -196,9 +187,10 @@ export function useSkills() {
     setSkills((prev) =>
       prev.map((skill) => {
         if (skill.id === id) return { ...skill, lockedInAt: t, updatedAt: t };
-        if (skill.lockedInAt !== null) return { ...skill, lockedInAt: null, timeSpentMs: skill.timeSpentMs + (t - skill.lockedInAt), updatedAt: t };
+        if (skill.lockedInAt !== null)
+          return { ...skill, lockedInAt: null, timeSpentMs: skill.timeSpentMs + (t - skill.lockedInAt), updatedAt: t };
         return skill;
-      })
+      }),
     );
   }, []);
 
@@ -212,7 +204,7 @@ export function useSkills() {
           return { ...skill, lockedInAt: null, timeSpentMs: skill.timeSpentMs + sessionMs, updatedAt: t };
         }
         return skill;
-      })
+      }),
     );
   }, []);
 
