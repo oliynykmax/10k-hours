@@ -22,12 +22,8 @@ export function HeroTimer({ skills, mode, showPracticeTip = false }: HeroTimerPr
 
   if (mode === "practice") {
     const isIdle = !lockedSkill;
-    const totalMs = lockedSkill?.lockedInAt
-      ? lockedSkill.timeSpentMs + (Date.now() - lockedSkill.lockedInAt)
-      : 0;
-    const elapsed = totalMs > 0
-      ? formatElapsed(totalMs)
-      : { days: "00", hours: "00", mins: "00", secs: "00" };
+    const totalMs = lockedSkill?.lockedInAt ? lockedSkill.timeSpentMs + (Date.now() - lockedSkill.lockedInAt) : 0;
+    const elapsed = totalMs > 0 ? formatElapsed(totalMs) : { days: "00", hours: "00", mins: "00", secs: "00" };
 
     const totalHours = formatTotalHours(totalMs);
     const milestone = totalMs > 0 ? getCurrentMilestone(parseFloat(totalHours)) : null;
@@ -97,9 +93,7 @@ export function HeroTimer({ skills, mode, showPracticeTip = false }: HeroTimerPr
             {milestone.label} tier &middot; {skills.length} skill{skills.length !== 1 ? "s" : ""}
           </p>
         )}
-        {skills.length === 0 && (
-          <p className="text-sm text-muted-foreground">add a skill to start tracking</p>
-        )}
+        {skills.length === 0 && <p className="text-sm text-muted-foreground">add a skill to start tracking</p>}
       </div>
 
       {/* Peach accent bar at bottom */}
@@ -120,9 +114,11 @@ function DigitGroup({ value, label, pulse, idle }: { value: string; label: strin
       >
         {value}
       </span>
-      <span className={`font-[family-name:var(--font-body)] text-[0.6rem] font-medium uppercase tracking-[0.14em] mt-1.5 transition-colors ${
-        idle ? "text-muted-foreground" : "text-white/60"
-      }`}>
+      <span
+        className={`font-[family-name:var(--font-body)] text-[0.6rem] font-medium uppercase tracking-[0.14em] mt-1.5 transition-colors ${
+          idle ? "text-muted-foreground" : "text-white/60"
+        }`}
+      >
         {label}
       </span>
     </div>

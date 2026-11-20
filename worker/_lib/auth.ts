@@ -14,9 +14,9 @@ export function createAuth(env: {
   const db = createDB(env.DB);
 
   // Determine the base URL for OAuth callbacks
-  // In production, this MUST be set via Cloudflare Pages environment variables
+  // wrangler.jsonc sets this in production
   const baseURL = env.BETTER_AUTH_URL || "http://localhost:8788";
-  
+
   return betterAuth({
     database: kyselyAdapter(db, { type: "sqlite" }),
     secret: env.BETTER_AUTH_SECRET,

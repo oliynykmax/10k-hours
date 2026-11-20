@@ -39,26 +39,35 @@ export default function App() {
     setShowPracticeTip(!loadPracticeTipSeen(userId));
   }, [userId]);
 
-  const setTimerMode = useCallback((m: TimerMode) => {
-    if (m === "overview") {
-      const locked = skills.find((t) => t.lockedInAt);
-      if (locked) stopPractice(locked.id);
-    }
-    _setTimerMode(m);
-  }, [skills, stopPractice, _setTimerMode]);
+  const setTimerMode = useCallback(
+    (m: TimerMode) => {
+      if (m === "overview") {
+        const locked = skills.find((t) => t.lockedInAt);
+        if (locked) stopPractice(locked.id);
+      }
+      _setTimerMode(m);
+    },
+    [skills, stopPractice, _setTimerMode],
+  );
 
-  const handleStartPractice = useCallback((id: string) => {
-    startPractice(id);
-    _setTimerMode("practice");
-    if (showPracticeTip) {
-      savePracticeTipSeen(userId);
-      setShowPracticeTip(false);
-    }
-  }, [startPractice, _setTimerMode, showPracticeTip, userId]);
+  const handleStartPractice = useCallback(
+    (id: string) => {
+      startPractice(id);
+      _setTimerMode("practice");
+      if (showPracticeTip) {
+        savePracticeTipSeen(userId);
+        setShowPracticeTip(false);
+      }
+    },
+    [startPractice, _setTimerMode, showPracticeTip, userId],
+  );
 
-  const handleStopPractice = useCallback((_id: string) => {
-    setTimerMode("overview");
-  }, [setTimerMode]);
+  const handleStopPractice = useCallback(
+    (_id: string) => {
+      setTimerMode("overview");
+    },
+    [setTimerMode],
+  );
 
   const hasSkills = skills.length > 0;
 
@@ -81,7 +90,7 @@ export default function App() {
                     "flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
                     mode === "overview"
                       ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                   aria-pressed={mode === "overview"}
                   aria-label="Overview mode"
@@ -95,12 +104,19 @@ export default function App() {
                     "flex h-8 items-center justify-center gap-1.5 rounded-lg px-3 text-xs font-semibold tracking-wide transition-all",
                     mode === "practice"
                       ? "bg-peach text-peach-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                   aria-pressed={mode === "practice"}
                   aria-label="Practice mode"
                 >
-                  <svg className="size-3" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <svg
+                    className="size-3"
+                    viewBox="0 0 16 16"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
                     <circle cx="8" cy="8" r="6" />
                     <path d="M8 4v4l2.5 1.5" />
                   </svg>
@@ -117,9 +133,7 @@ export default function App() {
                 onClick={toggleFontStyle}
                 className={cn(
                   "rounded-lg text-muted-foreground",
-                  fontStyle === "mono"
-                    ? "mono-chip text-primary"
-                    : "hover:bg-primary/10 hover:text-primary"
+                  fontStyle === "mono" ? "mono-chip text-primary" : "hover:bg-primary/10 hover:text-primary",
                 )}
                 aria-label="Toggle monospace style"
                 aria-pressed={fontStyle === "mono"}
@@ -179,7 +193,16 @@ export default function App() {
             {!hasSkills && (
               <div className="text-center py-12">
                 <div className="text-muted-foreground/40 mb-3 flex justify-center">
-                  <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <circle cx="12" cy="12" r="10" />
                     <path d="M8 12l2.5 2.5L16 9" />
                   </svg>
@@ -187,9 +210,7 @@ export default function App() {
                 <p className="font-[family-name:var(--font-display)] text-lg font-semibold text-muted-foreground mb-1">
                   no skills yet
                 </p>
-                <p className="text-sm text-muted-foreground/60">
-                  add one above to start tracking hours
-                </p>
+                <p className="text-sm text-muted-foreground/60">add one above to start tracking hours</p>
               </div>
             )}
           </div>

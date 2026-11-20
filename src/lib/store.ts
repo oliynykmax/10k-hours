@@ -25,12 +25,9 @@ export function loadSkills(): Skill[] {
     const skills: Skill[] = JSON.parse(raw);
     return skills.map((s) => {
       const maxSessionMs = 4 * 60 * 60 * 1000;
-      const lockedInAt = s.lockedInAt
-        ? (Date.now() - s.lockedInAt > maxSessionMs ? null : s.lockedInAt)
-        : null;
-      const timeSpentMs = s.lockedInAt && !lockedInAt
-        ? s.timeSpentMs + (Date.now() - s.lockedInAt)
-        : (s.timeSpentMs ?? 0);
+      const lockedInAt = s.lockedInAt ? (Date.now() - s.lockedInAt > maxSessionMs ? null : s.lockedInAt) : null;
+      const timeSpentMs =
+        s.lockedInAt && !lockedInAt ? s.timeSpentMs + (Date.now() - s.lockedInAt) : (s.timeSpentMs ?? 0);
       return {
         ...s,
         lockedInAt,
