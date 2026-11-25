@@ -22,13 +22,20 @@ bun run dev    # builds with Bun, then runs wrangler dev
 bun fmt && bun lint && bun check
 ```
 
-## deploy
+## deploy your own
+
+You need a Cloudflare account and Bun.
 
 ```bash
-bun run deploy
+bun install
+bunx wrangler login
+bunx wrangler secret put BETTER_AUTH_SECRET     # openssl rand -base64 32
+bun run deploy:fresh
 ```
 
-A Cloudflare Worker serves the SPA and the `/api` routes, with D1 for storage. See `ENVIRONMENT_SETUP.md` for secrets.
+`deploy:fresh` builds the app, deploys the Worker (Wrangler creates the `10k-hours-db` D1 database) and applies the migrations. The app is then at `https://10k-hours.<your-subdomain>.workers.dev`. Set `BETTER_AUTH_URL` to that address on later deploys with `bunx wrangler deploy --var BETTER_AUTH_URL:https://...`, and add Google or GitHub sign-in as described in `ENVIRONMENT_SETUP.md`. Later deploys use `bun run deploy`. Do not run `deploy:fresh` against an existing database whose schema was applied without Wrangler migrations.
+
+To deploy from GitHub Actions on every push to `main`, configure the `production` environment as described at the top of `.github/workflows/deploy.yml`. Every setting is in `.env.example`.
 
 ## stack
 
